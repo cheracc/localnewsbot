@@ -1,5 +1,6 @@
 import feedparser
 
+from config import Config
 from postablearticle import PostableArticle
 
 # RSS_Source handles parsing news articles from RSS feeds
@@ -25,3 +26,25 @@ class RSS_Source():
             )
             articles.append(article)
         return articles
+    
+# Parse RSS feeds from config and return list of PostableArticle
+def get_rss_feeds(config: Config) -> list[PostableArticle]:
+    feeds = []
+    rss_feeds = config.get_rss_feeds()
+    for _, feed_info in rss_feeds.items():
+        feeds.append(RSS_Source(feed_info["name"], feed_info["url"], feed_info["tag"]))
+
+    articles = []
+
+    for feed in feeds:
+        feed_articles = feed.get_articles()
+
+        # keep only the first x articles
+        if feed_articles:
+            feed_articles = feed_articles[:config.max_articles_per_feed]
+
+        articles.extend(feed_articles)
+        print(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
+
+    return articles
+

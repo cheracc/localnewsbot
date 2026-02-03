@@ -7,7 +7,8 @@ from bsky_auth import BskyAccount
 from config import Config
 from newsfilter import NewsFilter
 from htmlsource import WebNewsSource
-from rsssource import PostableArticle, RSS_Source
+from postablearticle import PostableArticle
+import rsssource
 
 # Main function
 def main():
@@ -16,7 +17,7 @@ def main():
 	db = DatabaseManager()
 	filter = NewsFilter(db, config)
 
-	articles = parse_rss_feeds(config)
+	articles = rsssource.get_rss_feeds(config)
 	articles.extend(parse_html_sources(config))
 
 	articles = filter.filter(articles)
@@ -34,27 +35,6 @@ def main():
 			bsky_account.post_article(article)
 			db.record_posted_article(article.link)
 			time.sleep(2)
-
-# Parse RSS feeds from config and return list of PostableArticle
-def parse_rss_feeds(config: Config) -> list[PostableArticle]:
-	feeds = []
-	rss_feeds = config.get_rss_feeds()
-	for _, feed_info in rss_feeds.items():
-		feeds.append(RSS_Source(feed_info["name"], feed_info["url"], feed_info["tag"]))
-
-	articles = []
-
-	for feed in feeds:
-		feed_articles = feed.get_articles()
-
-		# keep only the first x articles
-		if feed_articles:
-			feed_articles = feed_articles[:config.max_articles_per_feed]
-
-		articles.extend(feed_articles)
-		print(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
-
-	return articles
 
 # Parse HTML sources from config and return list of PostableArticle
 def parse_html_sources(config: Config) -> list[PostableArticle]:
