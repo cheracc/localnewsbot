@@ -1,5 +1,6 @@
 import datetime
 
+# NewsFilter applies filtering rules to a list of PostableArticle objects, the last step before posting to Bluesky
 class NewsFilter:
     def __init__(self, data, config):
         self.data = data
@@ -25,6 +26,10 @@ class NewsFilter:
             filtered_articles, removed = filter_fn(filtered_articles)
             removed_articles.extend(removed)
 
+
+        # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
+        # and defining a filter(articles: list[PostableArticle]) -> tuple[list[PostableArticle], list[PostableArticle]] function, 
+        # which returns the filtered articles and the removed articles (optionally) in that order.
         try:
             import customfilters
             custom_filtered, custom_removed = customfilters.filter(filtered_articles)
@@ -46,6 +51,7 @@ class NewsFilter:
 
         return filtered_articles
     
+    # Applies headline, body, and URL filters
     def filter_headlines(self, articles):
         filtered_articles = []
         removed_articles = []

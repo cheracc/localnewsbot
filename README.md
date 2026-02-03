@@ -21,7 +21,7 @@
 
 Before running the bot, you will need:
 
-* A Bluesky account.
+* A Bluesky account for the bot to use.
 * An **App Password** from Bluesky (Settings -> App Passwords).
 * Python 3.x installed.
 

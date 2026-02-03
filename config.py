@@ -39,24 +39,28 @@ class Config:
         self.password = self.config['bsky_password']
         self.max_articles_per_feed = self.config['max_articles_per_feed']
 
+    # Returns the RSS feeds from config
     def get_rss_feeds(self) -> Dict[str, Any]:
         feeds = self.config.get("rss_feeds", {}) or {}
         if not isinstance(feeds, dict):
             raise ValueError("rss_feeds in config must be a mapping")
         return feeds
     
+    # Returns the HTML sources from config
     def get_html_sources(self) -> Dict[str, Any]:
         sources = self.config.get("html_sources", {}) or {}
         if not isinstance(sources, dict):
             raise ValueError("html_sources in config must be a mapping")
         return sources
     
+    # Returns the list of bad words from config
     def get_bad_words(self) -> list[str]:
         bad_words = self.config.get("bad_words", []) or []
         if not isinstance(bad_words, list):
             raise ValueError("bad_words in config must be a list")
         return bad_words
     
+    # Returns the list of good words from config
     def get_good_words(self) -> list[str]:
         good_words = self.config.get("good_words", []) or []
         if not isinstance(good_words, list):
