@@ -1,4 +1,5 @@
 import newspaper
+from config import Config
 from postablearticle import PostableArticle
 import htmlsource
 from newspaper import Article
@@ -34,3 +35,24 @@ class WebNewsSource:
             )
             articles.append(extracted_article)
         return articles
+
+# Parse HTML sources from config and return list of PostableArticle
+def get_html_sources(config: Config) -> list[PostableArticle]:
+	sources = []
+	html_sources = config.get_html_sources()
+	for _, source_info in html_sources.items():
+		sources.append(WebNewsSource(source_info["name"], source_info["url"], source_info["tag"]))
+
+	articles = []
+
+	for source in sources:
+		source_articles = source.get_articles()
+
+		# keep only the first x articles
+		if source_articles:
+			source_articles = source_articles[:config.max_articles_per_feed]
+
+		articles.extend(source_articles)
+		print(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
+
+	return articles
