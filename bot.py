@@ -9,12 +9,12 @@ from newsfilter import NewsFilter
 from htmlsource import WebNewsSource
 from rsssource import PostableArticle, RSS_Source
 
-
+# Main function
 def main():
 	config = Config()
 	bsky_account = BskyAccount(config)
-	data = DatabaseManager()
-	filter = NewsFilter(data, config)
+	db = DatabaseManager()
+	filter = NewsFilter(db, config)
 
 	articles = parse_rss_feeds(config)
 	articles.extend(parse_html_sources(config))
@@ -26,18 +26,16 @@ def main():
 		return
 	
 	for article in articles:
-		if not data.has_posted_article(article.link):
+		if not db.has_posted_article(article.link):
 			
 			print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Posting article: {article.headline}")
-			# Here you would add the code to post the article using bsky_account
-			# For example: bsky_account.post_article(article)
-			
+		
 			# After posting, record the article as posted
 			bsky_account.post_article(article)
-			data.record_posted_article(article.link)
+			db.record_posted_article(article.link)
 			time.sleep(2)
 
-
+# Parse RSS feeds from config and return list of PostableArticle
 def parse_rss_feeds(config: Config) -> list[PostableArticle]:
 	feeds = []
 	rss_feeds = config.get_rss_feeds()
@@ -58,6 +56,7 @@ def parse_rss_feeds(config: Config) -> list[PostableArticle]:
 
 	return articles
 
+# Parse HTML sources from config and return list of PostableArticle
 def parse_html_sources(config: Config) -> list[PostableArticle]:
 	sources = []
 	html_sources = config.get_html_sources()

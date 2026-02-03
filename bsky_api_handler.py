@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 """
+this file was ripped directly from bluesky's official examples. some modifications were made. most of it is not used.
+
 Script demonstrating how to create posts using the Bluesky API, covering most of the features and embed options.
 
 To run this Python script, you need the 'requests' and 'bs4' (BeautifulSoup) packages installed.

@@ -1,7 +1,8 @@
 import feedparser
 
-from article import PostableArticle
+from postablearticle import PostableArticle
 
+# RSS_Source handles parsing news articles from RSS feeds
 class RSS_Source():
     def __init__(self, name: str, url: str, tag: str):
         self._name = name

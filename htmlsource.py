@@ -1,8 +1,9 @@
 import newspaper
-from article import PostableArticle
+from postablearticle import PostableArticle
 import htmlsource
 from newspaper import Article
 
+# WebNewsSource handles parsing news articles from HTML sources using the newspaper3k library
 class WebNewsSource:
     def __init__(self, name: str, url: str, tag: str):
         self._name = name

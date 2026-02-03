@@ -5,6 +5,7 @@ import json
 import bsky_api_handler
 from config import Config
 
+# BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
     def __init__(self, config: Config):
         cfg = config
