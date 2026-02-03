@@ -52,7 +52,7 @@ class NewsFilter:
         return filtered_articles
     
     # Applies headline, body, and URL filters
-    def filter_headlines(self, articles):
+    def filter_headlines(self, articles) -> tuple[list, list]:
         filtered_articles = []
         removed_articles = []
         for article in articles:
@@ -63,7 +63,7 @@ class NewsFilter:
                 print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Excluding due to headline filter: {article.headline}")
         return filtered_articles, removed_articles
     
-    def filter_body(self, articles):
+    def filter_body(self, articles) -> tuple[list, list]:
         filtered_articles = []
         removed_articles = []
         for article in articles:
@@ -74,7 +74,7 @@ class NewsFilter:
                 print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Excluding due to body filter: {article.headline}")
         return filtered_articles, removed_articles
     
-    def filter_url(self, articles):
+    def filter_url(self, articles) -> tuple[list, list]:
         filtered_articles = []
         removed_articles = []
         for article in articles:
