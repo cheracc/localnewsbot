@@ -5,17 +5,17 @@ import yaml
 
 class Config:
     """
-    Configuration handler for reading accounts.yml
+    Configuration handler for reading config.yml
     """
 
-    def read_accounts(self, path: str) -> Dict[str, Any]:
+    def read_config(self, path: str) -> Dict[str, Any]:
         """
-        Read accounts.yml and return its contents as a dict.
-        If path is None, looks for accounts.yml in the same directory as this file.
+        Read config.yml and return its contents as a dict.
+        If path is None, looks for config.yml in the same directory as this file.
         Returns an empty dict if the file does not exist.
         """
         if path is None:
-            path = os.path.join(os.path.dirname(__file__), "accounts.yml")
+            path = os.path.join(os.path.dirname(__file__), "config.yml")
 
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -29,10 +29,10 @@ class Config:
         return data
 
     def __init__(self):
-        self.config = self.read_accounts("accounts.yml")
+        self.config = self.read_config("config.yml")
 
         if 'bsky_handle' not in self.config or 'bsky_password' not in self.config:
-            print("accounts.yml must contain 'bsky_handle' and 'bsky_password' keys")
+            print("config.yml must contain 'bsky_handle' and 'bsky_password' keys")
             sys.exit(1)
         
         self.handle = self.config['bsky_handle']
