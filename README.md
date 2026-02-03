@@ -42,6 +42,7 @@ pip install feedparser
 pip install beautifulsoup
 
 ```
+and potentially any other ones it yells at you about - not sure
 
 
 3. **Configuration:**
