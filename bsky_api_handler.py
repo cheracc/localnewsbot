@@ -8,19 +8,13 @@ To run this Python script, you need the 'requests' and 'bs4' (BeautifulSoup) pac
 
 import html
 import re
-import os
-import shlex
-from shlex import shlex
 import sys
-import json
-import argparse
 from typing import Dict, List
 from datetime import datetime, timezone
 
 import requests
 from bs4 import BeautifulSoup
 
-from config import Config
 from rsssource import PostableArticle
 
 
