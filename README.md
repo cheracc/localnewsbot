@@ -45,6 +45,7 @@ pip install beautifulsoup
 
 
 3. **Configuration:**
+
 Rename the config.yml.example file to config.yml and add your information:
 - bsky_handle
 - bsky_password (must be an app password)
