@@ -1,0 +1,51 @@
+bsky_handle: "yourbskyhandle.bsky.social"
+bsky_password: "your-app-pass-word"
+max_articles_per_feed: 10
+rss_feeds:
+  abc27local:
+    name: "ABC27 Local News"
+    url: "https://www.abc27.com/local-news/rss"
+    tag: "abc27local"
+  abc27weather:
+    name: "ABC27 Weather"
+    url: "https://www.abc27.com/weather/rss"
+    tag: "abc27weather"
+  wgal:
+    name: "WGAL Top Stories"
+    url: "https://www.wgal.com/topstories-rss"
+    tag: "wgal"
+  pennlive:
+    name: "PennLive"
+    url: "https://www.pennlive.com/arc/outboundfeeds/rss/"
+    tag: "pennlive"
+  fox43:
+    name: "FOX43 News"
+    url: "https://www.fox43.com/feeds/syndication/rss/news/local"
+    tag: "fox43"
+html_sources:
+  cbs21:
+    name: "CBS21 News"
+    url: "https://local21news.com/news/local"
+    tag: "cbs21"
+  spotlightpa:
+    name: "Spotlight PA"
+    url: "https://www.spotlightpa.org/"
+    tag: "spotlightpa"
+  hbgpagov:
+    name: "City of Harrisburg"
+    url: "https://harrisburgpa.gov/news/"
+    tag: "hbgpagov"
+  witf:
+    name: "WITF News"
+    url: "https://www.witf.org/news/regional-state-news/"
+    tag: "witf"
+bad_words:
+  - "Trump"
+  - "Biden"
+good_words:
+  - "Dauphin"
+  - "Franklin Co"
+  - "Lancaster"
+  - "Harrisburg"
+  - "York"
+  - "Adams Co"
