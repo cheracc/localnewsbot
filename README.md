@@ -14,7 +14,7 @@
 
 * **Language:** Python (or Node.js)
 * **API:** [AT Protocol (atproto)](https://atproto.com/) for Bluesky interactions.
-* **Scraping:** BeautifulSoup / Playwright / Selenium (adjust based on your tool).
+* **Scraping:** BeautifulSoup
 * **Scheduling:** Cron jobs / GitHub Actions / Schedule library.
 
 ## 📋 Prerequisites
