@@ -3,17 +3,21 @@ import sys
 from typing import Dict, Any, Optional
 import yaml
 
+# Config handles reading and providing access to configuration settings from config.yml
 class Config:
-    """
-    Configuration handler for reading config.yml
-    """
+
+    def __init__(self):
+        self.config = self.read_config("config.yml")
+
+        if 'bsky_handle' not in self.config or 'bsky_password' not in self.config:
+            print("config.yml must contain 'bsky_handle' and 'bsky_password' keys")
+            sys.exit(1)
+        
+        self.handle = self.config['bsky_handle']
+        self.password = self.config['bsky_password']
+        self.max_articles_per_feed = self.config['max_articles_per_feed']
 
     def read_config(self, path: str) -> Dict[str, Any]:
-        """
-        Read config.yml and return its contents as a dict.
-        If path is None, looks for config.yml in the same directory as this file.
-        Returns an empty dict if the file does not exist.
-        """
         if path is None:
             path = os.path.join(os.path.dirname(__file__), "config.yml")
 
@@ -27,17 +31,6 @@ class Config:
             raise ValueError(f"{path} does not contain a YAML mapping at top level")
 
         return data
-
-    def __init__(self):
-        self.config = self.read_config("config.yml")
-
-        if 'bsky_handle' not in self.config or 'bsky_password' not in self.config:
-            print("config.yml must contain 'bsky_handle' and 'bsky_password' keys")
-            sys.exit(1)
-        
-        self.handle = self.config['bsky_handle']
-        self.password = self.config['bsky_password']
-        self.max_articles_per_feed = self.config['max_articles_per_feed']
 
     # Returns the RSS feeds from config
     def get_rss_feeds(self) -> Dict[str, Any]:
