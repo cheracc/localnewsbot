@@ -45,7 +45,7 @@ pip install beautifulsoup
 
 
 3. **Configuration:**
-Rename the accounts.yml.example file to accounts.yml and add your information:
+Rename the config.yml.example file to config.yml and add your information:
 - bsky_handle
 - bsky_password (must be an app password)
 - edit/add rss or html feeds as needed
