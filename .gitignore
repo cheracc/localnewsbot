@@ -3,3 +3,4 @@ database.sqlite
 __pycache__/
 customfilters.py
 .env
+log
