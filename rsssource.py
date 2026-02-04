@@ -1,5 +1,6 @@
 import feedparser
 import datetime
+import logging
 
 from config import Config
 from postablearticle import PostableArticle
@@ -29,7 +30,10 @@ class RSS_Source():
         return articles
     
 # Parse RSS feeds from config and return list of PostableArticle
-def get_rss_feeds(config: Config) -> list[PostableArticle]:
+def get_rss_feeds(config: Config, logger: logging.Logger = None) -> list[PostableArticle]:
+    if logger is None:
+        logger = logging.getLogger("rsssource")
+    
     feeds = []
     rss_feeds = config.get_rss_feeds()
     for _, feed_info in rss_feeds.items():
@@ -45,7 +49,7 @@ def get_rss_feeds(config: Config) -> list[PostableArticle]:
             feed_articles = feed_articles[:config.max_articles_per_feed]
 
         articles.extend(feed_articles)
-        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
+        logger.info(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
 
     return articles
 
