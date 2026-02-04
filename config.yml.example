@@ -2,6 +2,8 @@ bsky_handle: "yourbskyhandle.bsky.social"
 bsky_password: "your-app-pass-word"
 # the maximum number of articles that will be fetched each time the script is run
 max_articles_per_feed: 10
+# articles older than this will be ignored
+max_article_age_days: 7
 # log_level can be one of: DEBUG, INFO, WARNING
 log_level: "INFO"
 # for sites that have rss feeds. These work more quickly and are less resource intensive to scrape, so use rss if available. Uses feedparser to scrape
