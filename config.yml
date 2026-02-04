@@ -22,6 +22,10 @@ rss_feeds:
     name: "FOX43 News"
     url: "https://www.fox43.com/feeds/syndication/rss/news/local"
     tag: "fox43"
+  theburg:
+    name: "The Burg"
+    url: "https://theburgnews.com/news/feed/"
+    tag: "theburg"
 html_sources:
   cbs21:
     name: "CBS21 News"
@@ -39,6 +43,10 @@ html_sources:
     name: "WITF News"
     url: "https://www.witf.org/news/regional-state-news/"
     tag: "witf"
+  theburg:
+    name: "The Burg News"
+    url: "https://theburgnews.com/news/"
+    tag: "theburg"
 bad_words:
   - "Trump"
   - "Biden"

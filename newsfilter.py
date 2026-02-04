@@ -21,10 +21,11 @@ class NewsFilter:
 
         # Apply headline, body, and URL filters, splitting them into filtered and removed articles
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
-        filtered_articles, removed_articles = self.filter_headlines(articles)
-        for filter_fn in (self.filter_body, self.filter_url):
-            filtered_articles, removed = filter_fn(filtered_articles)
-            removed_articles.extend(removed)
+        removed_articles = []
+        filtered_articles = []
+
+        for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
+            filtered_articles, removed_articles = filter_fn(articles)
 
 
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
@@ -37,11 +38,6 @@ class NewsFilter:
             removed_articles.extend(custom_removed)
         except ImportError:
             pass
-
-        # Move filtered articles to a temp variable so they can be filtered again
-        articles = filtered_articles
-        filtered_articles = []
-
 
         for article in removed_articles[:]:
             if any(phrase in article.headline for phrase in goodwords):
