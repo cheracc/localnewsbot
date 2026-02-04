@@ -31,11 +31,11 @@ class NewsFilter:
 
 
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
-        # and defining a filter(articles: list[PostableArticle]) -> tuple[list[PostableArticle], list[PostableArticle]] function, 
+        # and defining a filter(articles: list[PostableArticle], logger:logging.Logger) -> tuple[list[PostableArticle], list[PostableArticle]] function, 
         # which returns the filtered articles and the removed articles (optionally) in that order.
         try:
             import customfilters
-            custom_filtered, custom_removed = customfilters.filter(filtered_articles)
+            custom_filtered, custom_removed = customfilters.filter(filtered_articles, self.logger)
             filtered_articles = custom_filtered
             removed_articles.extend(custom_removed)
         except ImportError:
