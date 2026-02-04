@@ -32,11 +32,13 @@ class NewsFilter:
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
         removed_articles = []
         filtered_articles = []
+        working_articles = articles
 
         for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
-            keep, toss = filter_fn(articles)
+            keep, toss = filter_fn(working_articles)
             filtered_articles.extend(keep)
             removed_articles.extend(toss)
+            working_articles = keep
             articles = keep  # only keep the articles that passed this filter for the next round
 
 
@@ -93,8 +95,10 @@ class NewsFilter:
         removed_articles = []
         for article in articles:
             cleaned_url = article.link.replace("/", " ").replace(".", " ").replace("-", " ")
+            self.logger.debug(f"Cleaned URL for filtering: {cleaned_url}")
             if not any(word in cleaned_url for word in self.filteredwords):
                 filtered_articles.append(article)
+                self.logger.debug(f"URL passed filter: {article.link}")
             else:
                 removed_articles.append(article)
                 self.logger.info(f"Excluding due to URL filter: {article.headline}")
