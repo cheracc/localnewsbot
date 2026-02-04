@@ -24,7 +24,7 @@ class NewsFilter:
                 previously_excluded.append(art)
 
         to_remove = previously_excluded + previously_posted
-        articles = [art for art in articles if art not in to_remove]
+        working_articles = [art for art in articles if art not in to_remove]
         
         self.logger.info(f"removed {len(previously_posted)} articles that were already posted and {len(previously_excluded)} articles that were previously excluded")
         
@@ -32,14 +32,12 @@ class NewsFilter:
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
         removed_articles = []
         filtered_articles = []
-        working_articles = articles
 
         for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
             keep, toss = filter_fn(working_articles)
             filtered_articles.extend(keep)
             removed_articles.extend(toss)
             working_articles = keep
-            articles = keep  # only keep the articles that passed this filter for the next round
 
 
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
@@ -49,7 +47,7 @@ class NewsFilter:
         try:
             import customfilters
             custom_filtered, custom_removed = customfilters.filter(filtered_articles, self.logger)
-            filtered_articles = custom_filtered
+            filtered_articles.extend(custom_filtered)
             removed_articles.extend(custom_removed)
         except ImportError:
             pass
