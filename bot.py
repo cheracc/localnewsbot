@@ -19,7 +19,7 @@ def main():
     config = Config()
     logger = __create_logger(config)
     bsky_api_handler = BskyApiHandler(logger)
-    bsky_account = BskyAccount(config)
+    bsky_account = BskyAccount(config, bsky_api_handler)
     db = DatabaseManager()
     filter = NewsFilter(db, config, logger)
 
