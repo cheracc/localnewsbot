@@ -2,6 +2,7 @@
 import datetime
 import logging
 import os
+import socket
 import time
 from data import DatabaseManager
 
@@ -18,6 +19,9 @@ def main():
     logger = __create_logger(config)
     logger.debug("config.yml loaded, Logger created with level: %s", config.get_log_level())
     
+	# bail on connections if we don't have anything in 10 seconds
+    socket.setdefaulttimeout(10)
+    
     try:
         bsky_api_handler = BskyApiHandler(logger)
         bsky_account = BskyAccount(config, bsky_api_handler)
@@ -28,7 +32,7 @@ def main():
         
         filter = NewsFilter(db, config, logger)
 
-        articles = rsssource.get_rss_feeds(config, logger)
+        articles = rsssource.get_rss_feeds(config, logger, db)
         articles.extend(htmlsource.get_html_sources(config, logger))
 
         articles = filter.filter(articles)

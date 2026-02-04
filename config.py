@@ -66,3 +66,12 @@ class Config:
         if not isinstance(log_level, str):
             raise ValueError("log_level in config must be a string")
         return log_level
+    
+    def max_article_age_days(self) -> Optional[int]:
+        max_age = self.config.get("max_article_age_days", None)
+        if max_age is not None:
+            try:
+                return int(max_age)
+            except ValueError:
+                raise ValueError("max_article_age_days in config must be an integer")
+        return None
