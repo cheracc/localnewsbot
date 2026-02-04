@@ -47,17 +47,17 @@ and potentially any other ones it yells at you about
 
 3. **Configuration:**
 
-Rename the config.yml.example file to config.yml and add your information:
-- 'bsky_handle'
-- 'bsky_password' (must be an app password)
+Rename the `config.yml.example` file to `config.yml` and add your information:
+- `bsky_handle`
+- `bsky_password` (must be an app password)
 - edit/add rss or html feeds as needed
-- 'bad_words' and 'good_words' (for filter)
+- `bad_words` and `good_words` (for filter)
 
 ## Filtering
 
-use 'bad_words' and 'good_words' in config.yml. Filtering works like this:
-1. any articles with a 'bad_word' in the title, description, or url are removed UNLESS they also contain a 'good_word'
-2. any custom filters are run. Place these in a 'customfilters.py' file with a filter(articles) function (see 'customfilters.py.example')
+use `bad_words` and `good_words` in config.yml. Filtering works like this:
+1. any articles with a `bad_word` in the title, description, or url are removed UNLESS they also contain a `good_word`
+2. any custom filters are run. Place these in a `customfilters.py` file with a filter(articles) function (see `customfilters.py.example`)
 
 ## Database
 
@@ -74,7 +74,7 @@ python bot.py
 
 ## 🤖 Deployment
 
-use cron or some other service to run bot.py at the desired interval
+use cron or some other service to run `bot.py` at the desired interval
 
 ## 📄 License
 
