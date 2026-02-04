@@ -19,8 +19,8 @@ def main():
     logger = __create_logger(config)
     logger.debug("config.yml loaded, Logger created with level: %s", config.get_log_level())
     
-	# bail on connections if we don't have anything in 10 seconds
-    socket.setdefaulttimeout(10)
+	# bail on connections if we don't have anything in 20 seconds
+    socket.setdefaulttimeout(20)
     
     try:
         bsky_api_handler = BskyApiHandler(logger)
@@ -34,6 +34,10 @@ def main():
 
         articles = rsssource.get_rss_feeds(config, logger, db)
         articles.extend(htmlsource.get_html_sources(config, logger))
+
+        if not articles:
+            logger.info("No new articles found from RSS or HTML sources.")
+            return
 
         articles = filter.filter(articles)
         
