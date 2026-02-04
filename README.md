@@ -1,3 +1,5 @@
+My bot can be found at [@hbgpalocalnews.bsky.social](https://bsky.app/profile/hbgpalocalnews.bsky.social)
+
 # LocalNewsBot 📰🤖
 
 `LocalNewsBot` is an automated tool designed to scrape local news headlines and articles from various sources and post them directly to **Bluesky**. It helps keep local communities informed by bridging the gap between traditional news sites and the decentralized social web.
