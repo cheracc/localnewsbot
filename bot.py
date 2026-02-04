@@ -10,17 +10,21 @@ from bsky_api_handler import BskyApiHandler
 from config import Config
 import htmlsource
 from newsfilter import NewsFilter
-from htmlsource import WebNewsSource
-from postablearticle import PostableArticle
 import rsssource
 
 # Main function
 def main():
     config = Config()
     logger = __create_logger(config)
+    logger.debug("config.yml loaded, Logger created with level: %s", config.get_log_level())
+    
     bsky_api_handler = BskyApiHandler(logger)
     bsky_account = BskyAccount(config, bsky_api_handler)
+    logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
+    
     db = DatabaseManager()
+    logger.debug("DatabaseManager initialized and connected to database")
+    
     filter = NewsFilter(db, config, logger)
 
     articles = rsssource.get_rss_feeds(config, logger)
