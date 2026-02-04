@@ -1,4 +1,5 @@
 import datetime
+import logging
 import newspaper
 from config import Config
 from postablearticle import PostableArticle
@@ -24,7 +25,8 @@ class WebNewsSource:
                 article.download()
                 article.parse()
             except Exception as e:
-                print(f"Error processing article: {e}")
+                logger = logging.getLogger("htmlsource")
+                logger.debug(f"Error processing article: {e}")
                 continue
 
             extracted_article = PostableArticle(
@@ -38,22 +40,25 @@ class WebNewsSource:
         return articles
 
 # Parse HTML sources from config and return list of PostableArticle
-def get_html_sources(config: Config) -> list[PostableArticle]:
-	sources = []
-	html_sources = config.get_html_sources()
-	for _, source_info in html_sources.items():
-		sources.append(WebNewsSource(source_info["name"], source_info["url"], source_info["tag"]))
+def get_html_sources(config: Config, logger: logging.Logger = None) -> list[PostableArticle]:
+    if logger is None:
+        logger = logging.getLogger("htmlsource")
+    
+    sources = []
+    html_sources = config.get_html_sources()
+    for _, source_info in html_sources.items():
+        sources.append(WebNewsSource(source_info["name"], source_info["url"], source_info["tag"]))
 
-	articles = []
+    articles = []
 
-	for source in sources:
-		source_articles = source.get_articles()
+    for source in sources:
+        source_articles = source.get_articles()
 
-		# keep only the first x articles
-		if source_articles:
-			source_articles = source_articles[:config.max_articles_per_feed]
+        # keep only the first x articles
+        if source_articles:
+            source_articles = source_articles[:config.max_articles_per_feed]
 
-		articles.extend(source_articles)
-		print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Fetched {len(source_articles)} articles from HTML source: {source._name}")
+        articles.extend(source_articles)
+        logger.info(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
 
-	return articles
+    return articles

@@ -1,10 +1,12 @@
 import datetime
+import logging
 
 # NewsFilter applies filtering rules to a list of PostableArticle objects, the last step before posting to Bluesky
 class NewsFilter:
-    def __init__(self, data, config):
+    def __init__(self, data, config, logger):
         self.data = data
         self.config = config
+        self.logger = logger
 
     def filter(self, articles):
         self.filteredwords = self.config.get_bad_words()
@@ -17,7 +19,7 @@ class NewsFilter:
 
         articles = [art for art in articles if art not in removed]
 
-        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] removed {len(removed)} articles that were already posted")
+        self.logger.info(f"removed {len(removed)} articles that were already posted")
 
         # Apply headline, body, and URL filters, splitting them into filtered and removed articles
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
@@ -41,7 +43,7 @@ class NewsFilter:
 
         for article in removed_articles[:]:
             if any(phrase in article.headline for phrase in goodwords):
-                print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Restoring due to ok phrase match: {article.headline}")
+                self.logger.info(f"Restoring due to ok phrase match: {article.headline}")
                 filtered_articles.append(article)
                 removed_articles.remove(article)
 
@@ -56,7 +58,7 @@ class NewsFilter:
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
-                print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Excluding due to headline filter: {article.headline}")
+                self.logger.info(f"Excluding due to headline filter: {article.headline}")
         return filtered_articles, removed_articles
     
     def filter_body(self, articles) -> tuple[list, list]:
@@ -67,7 +69,7 @@ class NewsFilter:
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
-                print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Excluding due to body filter: {article.headline}")
+                self.logger.info(f"Excluding due to body filter: {article.headline}")
         return filtered_articles, removed_articles
     
     def filter_url(self, articles) -> tuple[list, list]:
@@ -78,5 +80,5 @@ class NewsFilter:
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
-                print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Excluding due to URL filter: {article.headline}")
+                self.logger.info(f"Excluding due to URL filter: {article.headline}")
         return filtered_articles, removed_articles

@@ -59,3 +59,10 @@ class Config:
         if not isinstance(good_words, list):
             raise ValueError("good_words in config must be a list")
         return good_words
+    
+    # Returns the log level from config
+    def get_log_level(self) -> str:
+        log_level = self.config.get("log_level", "INFO")
+        if not isinstance(log_level, str):
+            raise ValueError("log_level in config must be a string")
+        return log_level
