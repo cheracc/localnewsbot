@@ -1,4 +1,4 @@
-accounts.yml
+config.yml
 database.sqlite
 __pycache__/
 customfilters.py
