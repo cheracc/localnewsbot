@@ -337,9 +337,6 @@ def create_post(args):
             args["pds_url"], session["accessJwt"], args["embed_url"]
         )
 
-    #print("creating post:", file=sys.stderr)
-    #print(json.dumps(post, indent=2), file=sys.stderr)
-
     resp = requests.post(
         args["pds_url"] + "/xrpc/com.atproto.repo.createRecord",
         headers={"Authorization": "Bearer " + session["accessJwt"]},
@@ -349,8 +346,7 @@ def create_post(args):
             "record": post,
         },
     )
-    #print("createRecord response:", file=sys.stderr)
-    #print(json.dumps(resp.json(), indent=2))
+
     try:
         resp.raise_for_status()
     except Exception as e:
@@ -360,7 +356,7 @@ def create_post(args):
         except Exception:
             pass
 
-
+# Converts a PostableArticle into a dictionary with appropriate arguments for create_post()
 def structure_post_from_article(handle: str, password: str, article: PostableArticle) -> Dict[str, str]:
     args = {}
     args["pds_url"] = "https://bsky.social"
