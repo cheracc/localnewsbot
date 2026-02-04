@@ -22,7 +22,7 @@ html_sources:
     name: "Spotlight PA"
     url: "https://www.spotlightpa.org/"
     tag: "spotlightpa"
-# articles with a 'bad word' will not be posted unless they also contain a 'good word'
+# articles with a 'bad word' in title/desc/url will not be posted unless they also contain a 'good word'
 bad_words:
   - "Trump"
   - "Biden"
