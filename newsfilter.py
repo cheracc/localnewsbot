@@ -11,16 +11,23 @@ class NewsFilter:
     def filter(self, articles):
         self.filteredwords = self.config.get_bad_words()
         goodwords = self.config.get_good_words()
-        removed = []
+        previously_posted = []
 
         for art in articles:
             if self.data.has_posted_article(art.link):
-                removed.append(art)
+                previously_posted.append(art)
 
-        articles = [art for art in articles if art not in removed]
 
-        self.logger.info(f"removed {len(removed)} articles that were already posted")
+        previously_excluded = []
+        for art in articles:
+            if self.data.is_excluded(art.link):
+                previously_excluded.append(art)
 
+        to_remove = previously_excluded + previously_posted
+        articles = [art for art in articles if art not in to_remove]
+        
+        self.logger.info(f"removed {len(previously_posted)} articles that were already posted and {len(previously_excluded)} articles that were previously excluded")
+        
         # Apply headline, body, and URL filters, splitting them into filtered and removed articles
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
         removed_articles = []
@@ -31,8 +38,9 @@ class NewsFilter:
 
 
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
-        # and defining a filter(articles: list[PostableArticle], logger:logging.Logger) -> tuple[list[PostableArticle], list[PostableArticle]] function, 
-        # which returns the filtered articles and the removed articles (optionally) in that order.
+        # and defining a 
+        #   filter(articles: list[PostableArticle], logger:logging.Logger) -> tuple[list[PostableArticle], list[PostableArticle]] 
+        # function, which returns the filtered articles and the removed articles in that order. (See customfilters.py.example)
         try:
             import customfilters
             custom_filtered, custom_removed = customfilters.filter(filtered_articles, self.logger)
@@ -46,6 +54,11 @@ class NewsFilter:
                 self.logger.info(f"Restoring due to ok phrase match: {article.headline}")
                 filtered_articles.append(article)
                 removed_articles.remove(article)
+
+        for article in removed_articles:
+            self.data.record_excluded_article(article.link)
+            
+        self.logger.debug(f"Added {len(removed_articles)} articles to 'excluded' table in database")
 
         return filtered_articles
     

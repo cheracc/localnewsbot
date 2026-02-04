@@ -18,32 +18,36 @@ def main():
     logger = __create_logger(config)
     logger.debug("config.yml loaded, Logger created with level: %s", config.get_log_level())
     
-    bsky_api_handler = BskyApiHandler(logger)
-    bsky_account = BskyAccount(config, bsky_api_handler)
-    logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
-    
-    db = DatabaseManager()
-    logger.debug("DatabaseManager initialized and connected to database")
-    
-    filter = NewsFilter(db, config, logger)
-
-    articles = rsssource.get_rss_feeds(config, logger)
-    articles.extend(htmlsource.get_html_sources(config, logger))
-
-    articles = filter.filter(articles)
-    
-    if not articles:
-        logger.info("No articles to post after filtering.")
-        return
-    
-    for article in articles:
-        if not db.has_posted_article(article.link):
-            logger.info(f"Posting article: {article.headline}")
+    try:
+        bsky_api_handler = BskyApiHandler(logger)
+        bsky_account = BskyAccount(config, bsky_api_handler)
+        logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
         
-            # After posting, record the article as posted
-            bsky_account.post_article(article)
-            db.record_posted_article(article.link)
-            time.sleep(2)
+        db = DatabaseManager()
+        logger.debug("DatabaseManager initialized and connected to database")
+        
+        filter = NewsFilter(db, config, logger)
+
+        articles = rsssource.get_rss_feeds(config, logger)
+        articles.extend(htmlsource.get_html_sources(config, logger))
+
+        articles = filter.filter(articles)
+        
+        if not articles:
+            logger.info("No articles to post after filtering.")
+            return
+        
+        for article in articles:
+            if not db.has_posted_article(article.link):
+                logger.info(f"Posting article: {article.headline}")
+            
+                # After posting, record the article as posted
+                bsky_account.post_article(article)
+                db.record_posted_article(article.link)
+                time.sleep(2)
+    except Exception as e:
+        logger.exception("An error occurred in main()")
+        raise
 
 def __create_logger(config: Config) -> logging.Logger:
     logger = logging.getLogger("bot")
