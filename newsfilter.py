@@ -31,23 +31,20 @@ class NewsFilter:
         # Apply headline, body, and URL filters, splitting them into filtered and removed articles
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
         removed_articles = []
-        filtered_articles = []
 
         for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
             keep, toss = filter_fn(working_articles)
-            filtered_articles.extend(keep)
             removed_articles.extend(toss)
-            working_articles = keep
-
-
+            working_articles = keep  # continue filtering only the kept articles
+        
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
         # and defining a 
         #   filter(articles: list[PostableArticle], logger:logging.Logger) -> tuple[list[PostableArticle], list[PostableArticle]] 
         # function, which returns the filtered articles and the removed articles in that order. (See customfilters.py.example)
         try:
             import customfilters
-            custom_filtered, custom_removed = customfilters.filter(filtered_articles, self.logger)
-            filtered_articles.extend(custom_filtered)
+            custom_filtered, custom_removed = customfilters.filter(working_articles, self.logger)
+            working_articles = custom_filtered
             removed_articles.extend(custom_removed)
         except ImportError:
             pass
@@ -55,7 +52,7 @@ class NewsFilter:
         for article in removed_articles[:]:
             if any(phrase in article.headline for phrase in goodwords):
                 self.logger.info(f"Restoring due to ok phrase match: {article.headline}")
-                filtered_articles.append(article)
+                working_articles.append(article)
                 removed_articles.remove(article)
 
         for article in removed_articles:
@@ -63,7 +60,7 @@ class NewsFilter:
             
         self.logger.debug(f"Added {len(removed_articles)} articles to 'excluded' table in database")
 
-        return filtered_articles
+        return working_articles
     
     # Applies headline, body, and URL filters
     def filter_headlines(self, articles) -> tuple[list, list]:
