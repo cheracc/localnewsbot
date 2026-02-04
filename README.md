@@ -4,18 +4,18 @@
 
 ## 🚀 Features
 
-* **Automated Scraping:** Periodically checks local news websites for new stories.
+* **Automated Scraping:** Each run checks local news websites for new stories.
 * **Bluesky Integration:** Automatically formats and posts news updates to your Bluesky profile.
 * **Rich Embeds:** Supports posting with titles, descriptions, and article links.
-* **Deduplication:** Ensures the same news story isn't posted multiple times.
-* **Headless Operation:** Designed to run on a server or via GitHub Actions.
+* **Deduplication:** Ensures the same news story isn't posted multiple times (uses sqlite).
+* **Headless Operation:** This is a simple python script that can be run on anything that runs python.
 
 ## 🛠️ Tech Stack
 
-* **Language:** Python (or Node.js)
+* **Language:** Python
 * **API:** [AT Protocol (atproto)](https://atproto.com/) for Bluesky interactions.
 * **Scraping:** feedparser (RSS) / newspaper3k (HTML)
-* **Scheduling:** Cron jobs / GitHub Actions / Schedule library.
+* **Scheduling:** cron etc.
 
 ## 📋 Prerequisites
 
@@ -39,7 +39,7 @@ cd localnewsbot
 ```bash
 pip install newspaper3k
 pip install feedparser
-pip install beautifulsoup
+pip install beautifulsoup4
 
 ```
 and potentially any other ones it yells at you about
@@ -84,7 +84,7 @@ Distributed under the MIT NON-AI License. See `LICENSE` for more information.
 
 ### Contact
 
-Please don't
+Please don't 🙅
 
 **Project Link:** [https://github.com/cheracc/localnewsbot](https://www.google.com/search?q=https://github.com/cheracc/localnewsbot)
 
