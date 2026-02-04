@@ -343,6 +343,7 @@ class BskyApiHandler:
             resp.raise_for_status()
         except Exception as e:
             self.logger.warning(f"failed to create record: {e}")
+            self.logger.debug(f"request body: {post}")
             try:
                 self.logger.debug(resp.text)
             except Exception:
