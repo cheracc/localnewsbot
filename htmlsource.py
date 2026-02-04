@@ -1,3 +1,4 @@
+import datetime
 import newspaper
 from config import Config
 from postablearticle import PostableArticle
@@ -53,6 +54,6 @@ def get_html_sources(config: Config) -> list[PostableArticle]:
 			source_articles = source_articles[:config.max_articles_per_feed]
 
 		articles.extend(source_articles)
-		print(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
+		print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Fetched {len(source_articles)} articles from HTML source: {source._name}")
 
 	return articles

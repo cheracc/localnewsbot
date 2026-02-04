@@ -1,4 +1,5 @@
 import feedparser
+import datetime
 
 from config import Config
 from postablearticle import PostableArticle
@@ -44,7 +45,7 @@ def get_rss_feeds(config: Config) -> list[PostableArticle]:
             feed_articles = feed_articles[:config.max_articles_per_feed]
 
         articles.extend(feed_articles)
-        print(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
+        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
 
     return articles
 
