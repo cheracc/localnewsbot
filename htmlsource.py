@@ -33,7 +33,7 @@ class WebNewsSource:
                 source_name=self._name,
                 headline=article.title,
                 description=article.meta_description or article.text[:200] + '...',
-                link=article.url,
+                link=article.url.split('?')[0].split('#')[0],  # Remove query parameters and fragment identifiers for consistency
                 created_at=article.publish_date.strftime('%a, %d %b %Y %H:%M:%S %z') if article.publish_date else ''
             )
             articles.append(extracted_article)
