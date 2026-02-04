@@ -23,10 +23,6 @@ def main():
     socket.setdefaulttimeout(20)
     
     try:
-        bsky_api_handler = BskyApiHandler(logger)
-        bsky_account = BskyAccount(config, bsky_api_handler)
-        logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
-        
         db = DatabaseManager()
         logger.debug("DatabaseManager initialized and connected to database")
         
@@ -44,6 +40,10 @@ def main():
         if not articles:
             logger.info("No articles to post after filtering.")
             return
+        
+        bsky_api_handler = BskyApiHandler(logger)
+        bsky_account = BskyAccount(config, bsky_api_handler)
+        logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
         
         for article in articles:
             if not db.has_posted_article(article.link):
