@@ -6,6 +6,7 @@ import time
 from data import DatabaseManager
 
 from bsky_auth import BskyAccount
+from bsky_api_handler import BskyApiHandler
 from config import Config
 import htmlsource
 from newsfilter import NewsFilter
@@ -17,6 +18,7 @@ import rsssource
 def main():
     config = Config()
     logger = __create_logger(config)
+    bsky_api_handler = BskyApiHandler(logger)
     bsky_account = BskyAccount(config)
     db = DatabaseManager()
     filter = NewsFilter(db, config, logger)
