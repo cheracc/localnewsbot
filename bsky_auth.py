@@ -12,10 +12,10 @@ class BskyAccount():
 
         self.handle = cfg.config['bsky_handle']
         self.password = cfg.config['bsky_password']
-        self.did = self.get_did()
-        self.apiKey = self.get_api_key()
+        self.did = self.__get_did()
+        self.apiKey = self.__get_api_key()
 
-    def get_did(self):
+    def __get_did(self):
         http = urllib3.PoolManager()
         DID_URL = "https://bsky.social/xrpc/com.atproto.identity.resolveHandle"
         did_resolve = http.request("GET", DID_URL, fields={"handle": self.handle})
@@ -26,7 +26,7 @@ class BskyAccount():
         else:
             return json.loads(did_resolve.data)["did"]
 
-    def get_api_key(self):
+    def __get_api_key(self):
         http = urllib3.PoolManager()
         API_KEY_URL = "https://bsky.social/xrpc/com.atproto.server.createSession"
 
