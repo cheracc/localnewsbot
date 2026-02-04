@@ -84,6 +84,8 @@ Distributed under the MIT NON-AI License. See `LICENSE` for more information.
 
 ### Contact
 
+Please don't
+
 **Project Link:** [https://github.com/cheracc/localnewsbot](https://www.google.com/search?q=https://github.com/cheracc/localnewsbot)
 
 ### This is offered as is, no support will be provided.
