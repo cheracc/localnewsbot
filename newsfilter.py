@@ -34,7 +34,10 @@ class NewsFilter:
         filtered_articles = []
 
         for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
-            filtered_articles, removed_articles = filter_fn(articles)
+            keep, toss = filter_fn(articles)
+            filtered_articles.extend(keep)
+            removed_articles.extend(toss)
+            articles = keep  # only keep the articles that passed this filter for the next round
 
 
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
