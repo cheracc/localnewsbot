@@ -14,7 +14,7 @@
 
 * **Language:** Python (or Node.js)
 * **API:** [AT Protocol (atproto)](https://atproto.com/) for Bluesky interactions.
-* **Scraping:** BeautifulSoup
+* **Scraping:** feedparser (RSS) / newspaper3k (HTML)
 * **Scheduling:** Cron jobs / GitHub Actions / Schedule library.
 
 ## 📋 Prerequisites
@@ -42,7 +42,7 @@ pip install feedparser
 pip install beautifulsoup
 
 ```
-and potentially any other ones it yells at you about - not sure
+and potentially any other ones it yells at you about
 
 
 3. **Configuration:**
@@ -55,9 +55,9 @@ Rename the config.yml.example file to config.yml and add your information:
 
 ## Filtering
 
-use bad_words and good_words in accounts.yml. Filtering works like this:
+use bad_words and good_words in config.yml. Filtering works like this:
 1. any articles with a bad word in the title, description, or url are removed UNLESS they also contain a good word
-2. any custom filters are run. Place these in a customfilters.py file with a filter(articles) function
+2. any custom filters are run. Place these in a customfilters.py file with a filter(articles) function (see customfilters.py.example)
 
 ## Database
 
@@ -74,7 +74,7 @@ python bot.py
 
 ## 🤖 Deployment
 
-use crontab or some other service to run bot.py at the desired interval
+use cron or some other service to run bot.py at the desired interval
 
 ## 📄 License
 
