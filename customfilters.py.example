@@ -1,0 +1,10 @@
+
+def filter(articles) -> tuple[list, list]:
+    filtered_articles = []
+    removed_articles = []
+    for article in articles:
+
+        # put your custom filtering logic here
+        filtered_articles.append(article)
+
+    return filtered_articles, removed_articles
