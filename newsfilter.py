@@ -92,7 +92,7 @@ class NewsFilter:
         filtered_articles = []
         removed_articles = []
         for article in articles:
-            cleaned_url = article.link.replace("/", " ").replace(".", " ")
+            cleaned_url = article.link.replace("/", " ").replace(".", " ").replace("-", " ")
             if not any(word in cleaned_url for word in self.filteredwords):
                 filtered_articles.append(article)
             else:
