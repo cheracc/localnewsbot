@@ -49,11 +49,11 @@ and potentially any other ones it yells at you about
 
 3. **Configuration:**
 
-Rename the `config.yml.example` file to `config.yml` and add your information:
-- `bsky_handle`
-- `bsky_password` (must be an app password)
-- edit/add rss or html feeds as needed
-- `bad_words` and `good_words` (for filter)
+Rename the `config examples` directory to `config` add your bot's info, and modify to suit:
+- `config.yml` contains the main settings, bot password, etc.
+- `feeds.yml` is where you enter the info for the feeds you want to watch
+- `filter.yml` is where you enter your good and bad words for the article filter
+- `tags.yml` is where you can make #tags and set keywords that will cause articles to be tagged
 
 ## Filtering
 

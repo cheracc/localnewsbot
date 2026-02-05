@@ -1,7 +1,15 @@
 config.yml
 database.sqlite
 __pycache__/
-customfilters.py
+src/__pycache__
+src/customfilters.py
 .env
-log
+log/
 .gitignore
+feeds.yml
+config.yml
+filter.yml
+tags.yml
+config/
+data/
+

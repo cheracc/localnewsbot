@@ -2,8 +2,8 @@ import sys
 import urllib3
 import json
 
-from bsky_api_handler import BskyApiHandler
-from config import Config
+from src.bsky_api_handler import BskyApiHandler
+from src.config import Config
 
 # BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
@@ -11,8 +11,8 @@ class BskyAccount():
         cfg = config
         self.bsky_api_handler = bsky_api_handler
 
-        self.handle = cfg.config['bsky_handle']
-        self.password = cfg.config['bsky_password']
+        self.handle = cfg.handle
+        self.password = cfg.password
         self.did = self.__get_did()
         self.apiKey = self.__get_api_key()
 

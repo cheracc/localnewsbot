@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
-
 """
-this file was ripped directly from bluesky's official examples. some modifications were made. most of it is not used.
-
+this file was ripped directly from bluesky's official examples. some modifications were made.
 Script demonstrating how to create posts using the Bluesky API, covering most of the features and embed options.
-
 To run this Python script, you need the 'requests' and 'bs4' (BeautifulSoup) packages installed.
 """
-
 import html
 import re
 import logging
-from typing import Dict, List
-from datetime import datetime, timezone
-
 import requests
+from typing import Dict, List, Any
+from datetime import datetime, timezone
 from bs4 import BeautifulSoup
-
-from rsssource import PostableArticle
-
+from src.rsssource import PostableArticle
 
 class BskyApiHandler:
-    def __init__(self, logger: logging.Logger = None):
-        self.logger = logger or logging.getLogger("bsky_api_handler")
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
 
     def bsky_login_session(self, pds_url: str, handle: str, password: str) -> Dict:
         resp = requests.post(
@@ -47,21 +40,6 @@ class BskyApiHandler:
             )
         return spans
 
-    def test_parse_mentions(self):
-        assert self.parse_mentions("prefix @handle.example.com @handle.com suffix") == [
-            {"start": 7, "end": 26, "handle": "handle.example.com"},
-            {"start": 27, "end": 38, "handle": "handle.com"},
-        ]
-        assert self.parse_mentions("handle.example.com") == []
-        assert self.parse_mentions("@bare") == []
-        assert self.parse_mentions("💩💩💩 @handle.example.com") == [
-            {"start": 13, "end": 32, "handle": "handle.example.com"}
-        ]
-        assert self.parse_mentions("email@example.com") == []
-        assert self.parse_mentions("cc:@example.com") == [
-            {"start": 3, "end": 15, "handle": "example.com"}
-        ]
-
     def parse_urls(self, text: str) -> List[Dict]:
         spans = []
         # partial/naive URL regex based on: https://stackoverflow.com/a/3809435
@@ -77,29 +55,6 @@ class BskyApiHandler:
                 }
             )
         return spans
-
-    def test_parse_urls(self):
-        assert self.parse_urls(
-            "prefix https://example.com/index.html http://bsky.app suffix"
-        ) == [
-            {"start": 7, "end": 37, "url": "https://example.com/index.html"},
-            {"start": 38, "end": 53, "url": "http://bsky.app"},
-        ]
-        assert self.parse_urls("example.com") == []
-        assert self.parse_urls("💩💩💩 http://bsky.app") == [
-            {"start": 13, "end": 28, "url": "http://bsky.app"}
-        ]
-        assert self.parse_urls("runonhttp://blah.comcontinuesafter") == []
-        assert self.parse_urls("ref [https://bsky.app]") == [
-            {"start": 5, "end": 21, "url": "https://bsky.app"}
-        ]
-        # note: a better regex would not mangle these:
-        assert self.parse_urls("ref (https://bsky.app/)") == [
-            {"start": 5, "end": 22, "url": "https://bsky.app/"}
-        ]
-        assert self.parse_urls("ends https://bsky.app. what else?") == [
-            {"start": 5, "end": 21, "url": "https://bsky.app"}
-        ]
 
     def parse_facets(self, pds_url: str, text: str) -> List[Dict]:
         """
@@ -195,7 +150,7 @@ class BskyApiHandler:
             },
         }
 
-    def upload_file(self, pds_url, access_token, filename, img_bytes) -> Dict:
+    def upload_file(self, pds_url, access_token, filename, img_bytes):
         suffix = filename.split(".")[-1].lower()
         mimetype = "application/octet-stream"
         if suffix in ["png"]:
@@ -268,7 +223,6 @@ class BskyApiHandler:
                 card["thumb"] = self.upload_file(pds_url, access_token, img_url, resp.content)
             except Exception as e:
                 self.logger.warning(f"failed to fetch/upload embed thumbnail: {e}")
-            card["thumb"] = self.upload_file(pds_url, access_token, img_url, resp.content)
 
         return {
             "$type": "app.bsky.embed.external",
@@ -313,18 +267,19 @@ class BskyApiHandler:
                 post["facets"] = facets
 
         # if this is a reply, get references to the parent and root
-        """
-        if args["reply_to"]:
+        
+        if args.get("reply_to"):
             post["reply"] = self.get_reply_refs(args["pds_url"], args["reply_to"])
 
-        if args["image"]:
+        if args.get("image"):
             post["embed"] = self.upload_images(
                 args["pds_url"], session["accessJwt"], args["image"], args["alt_text"]
             )
-        elif args["embed_ref"]:
+
+        elif args.get("embed_ref"):
             post["embed"] = self.get_embed_ref(args["pds_url"], args["embed_ref"])
-        """
-        if args["embed_url"]:
+
+        elif args.get("embed_url"):
             post["embed"] = self.fetch_embed_url_card(
                 args["pds_url"], session["accessJwt"], args["embed_url"]
             )
@@ -349,7 +304,7 @@ class BskyApiHandler:
             except Exception:
                 pass
 
-    def structure_post_from_article(self, handle: str, password: str, article: PostableArticle) -> Dict[str, str]:
+    def structure_post_from_article(self, handle: str, password: str, article: PostableArticle) -> Dict[str, Any]:
         args = {}
         args["pds_url"] = "https://bsky.social"
         args["handle"] = handle

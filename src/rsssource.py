@@ -2,9 +2,9 @@ import feedparser
 import datetime
 import logging
 
-from config import Config
-from data import DatabaseManager
-from postablearticle import PostableArticle
+from src.config import Config
+from src.data import DatabaseManager
+from src.postablearticle import PostableArticle
 
 # RSS_Source handles parsing news articles from RSS feeds
 class RSS_Source():

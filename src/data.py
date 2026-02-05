@@ -1,7 +1,7 @@
 from pathlib import Path
 import sqlite3
 
-DB_PATH = Path(__file__).parent / "database.sqlite"
+DB_PATH = Path("data/database.sqlite")
 
 # DatabaseManager handles SQLite operations for tracking posted articles. It's a very simple sqlite database that just 
 # records article URLs that have been posted already and the time posted.
