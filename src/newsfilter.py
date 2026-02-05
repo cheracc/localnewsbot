@@ -1,5 +1,3 @@
-import datetime
-import logging
 
 # NewsFilter applies filtering rules to a list of PostableArticle objects, the last step before posting to Bluesky
 class NewsFilter:

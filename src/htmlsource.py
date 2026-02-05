@@ -1,9 +1,9 @@
-import datetime
 import logging
 import newspaper
-from config import Config
-from postablearticle import PostableArticle
-import htmlsource
+import datetime
+from src.config import Config
+from src.postablearticle import PostableArticle
+import src.htmlsource as htmlsource
 from newspaper import Article
 
 # WebNewsSource handles parsing news articles from HTML sources using the newspaper3k library
@@ -40,7 +40,7 @@ class WebNewsSource:
         return articles
 
 # Parse HTML sources from config and return list of PostableArticle
-def get_html_sources(config: Config, logger: logging.Logger = None) -> list[PostableArticle]:
+def get_html_sources(config: Config, logger: logging.Logger) -> list[PostableArticle]:
     if logger is None:
         logger = logging.getLogger("htmlsource")
     
