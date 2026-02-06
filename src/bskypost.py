@@ -47,14 +47,14 @@ class BskyPost:
 
         # replace block-level tags with newlines
         text = re.sub(r'(?i)<\s*(br|p|div|li|tr|h[1-6])\b[^>]*>', '\n', text)
-        text = re.sub(r'(?i)</\s*(p|div|li|tr|h[1-6])\s*>', '\n', text)
+        text = re.sub(r'(?i)</\s*(p|div|li|tr|h[1-6])\s*>', '', text)
 
         # remove any other tags
         text = re.sub(r'<[^>]+>', '', text)
 
         # normalize whitespace and newlines
         text = text.replace('\r', '')
-        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r'\n{3,}', '\n', text)
         text = re.sub(r'[ \t]+', ' ', text).strip()
 
         return text
