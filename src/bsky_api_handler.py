@@ -302,7 +302,7 @@ class BskyApiHandler:
         }
 
     def create_post(self, bsky_account, bsky_post: BskyPost):
-        args = bsky_post.get_post_args(bsky_account.cfg)
+        args = bsky_post.get_post_args(bsky_account)
         session = self.bsky_login_session(args["pds_url"], args["handle"], args["password"])
 
         # trailing "Z" is preferred over "+00:00"
