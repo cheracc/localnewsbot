@@ -92,6 +92,15 @@ class Config:
     def get_tags(self) -> Dict[str, str]:
         return self.__tags_config
     
+    def get_gemini_api_key(self) -> str:
+        return self.__main_config.get("gemini_api_key", "")
+    
+    def get_gemini_model(self) -> str:
+        return self.__main_config.get("gemini_model", "")
+    
+    def get_ai_summary_prompt(self) -> str:
+        return self.__main_config.get("ai_summary_prompt", "")
+    
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")
 

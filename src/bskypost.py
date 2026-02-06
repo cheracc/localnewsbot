@@ -2,6 +2,7 @@
 # Definition of BskyPost class - represents an article to be posted
 import html
 import re
+from src.aisummary import Summarizer
 import src.tags as tags
 
 
@@ -16,16 +17,19 @@ class BskyPost:
         self.tag = tag
         self.created_at = created_at
 
-    def get_post_text(self, tags_config):
+    def get_post_text(self, bsky_account):
         if self.formatted_text is None:
-            self.formatted_text = self.format_post_text(tags_config)
-        return self.add_tags_to_post(tags_config)
+#            self.formatted_text = self.format_post_text(tags_config)
+            self.formatted_text = self.get_ai_summary(bsky_account)
+            if self.formatted_text == "":
+                self.formatted_text = self.format_post_text(bsky_account.cfg.get_tags())
+        return self.add_tags_to_post(bsky_account.cfg.get_tags())
 
     def add_tags_to_post(self, tags_config):
         return tags.add_tags_to_post(self, tags_config)
 
     def post_to_bluesky(self, bsky_account):
-        post_text = self.get_post_text(bsky_account.cfg.get_tags_config())
+        post_text = self.get_post_text(bsky_account)
         bsky_account.post_article(post_text)
 
     def format_post_text(self, tags_config) -> str:
@@ -55,11 +59,15 @@ class BskyPost:
 
         return text
     
-    def get_post_args(self, config) -> dict:
+    def get_post_args(self, bsky_account) -> dict:
         return {
             "pds_url": "https://bsky.social",
-            "handle": config.handle,
-            "password": config.password,
+            "handle": bsky_account.cfg.handle,
+            "password": bsky_account.cfg.password,
             "embed_url": self.link,
-            "text": self.get_post_text(config.get_tags())
+            "text": self.get_post_text(bsky_account)
         }
+    
+    def get_ai_summary(self, bsky_account) -> str:
+        ai = Summarizer(bsky_account.cfg)
+        return ai.summarize(self.link)

@@ -53,7 +53,7 @@ def main():
                 # After posting, record the article as posted
                 bsky_account.post_article(article)
                 db.record_posted_article(article.link)
-                time.sleep(2)
+                time.sleep(5)
     except Exception as e:
         logger.exception("An error occurred in main()")
         raise
