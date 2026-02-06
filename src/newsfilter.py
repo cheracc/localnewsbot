@@ -1,10 +1,10 @@
 
 # NewsFilter applies filtering rules to a list of PostableArticle objects, the last step before posting to Bluesky
 class NewsFilter:
-    def __init__(self, data, config, logger):
-        self.data = data
+    def __init__(self, config):
+        self.data = config.db
         self.config = config
-        self.logger = logger
+        self.logger = config.get_logger()
 
     def filter(self, articles):
         self.filteredwords = self.config.get_bad_words()

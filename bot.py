@@ -1,63 +1,51 @@
 #!/usr/bin/env python3
-import datetime
-import logging
-import os
 import socket
 import time
-from src.data import DatabaseManager
-
-from src.bsky_auth import BskyAccount
-from src.bsky_api_handler import BskyApiHandler
-from src.config import Config
-from src.newsfilter import NewsFilter
-
 import src.htmlsource
-from src.newsfilter import NewsFilter
 import src.rsssource
+from src.bskypost import BskyPost
+from src.config import Config
 
 # Main function
 def main():
-    config = Config()
-    logger = config.get_logger()
-    logger.debug("config.yml loaded, Logger created with level: %s", config.get_log_level())
-    
 	# bail on connections if we don't have anything in 20 seconds
     socket.setdefaulttimeout(20)
+    config = Config()
     
-    try:
-        db = DatabaseManager()
-        logger.debug("DatabaseManager initialized and connected to database")
-        
-        filter = NewsFilter(db, config, logger)
+    # Check all RSS and HTML feeds for articles that haven't been posted
+    articles = get_all_new_articles(config)
+    
+    if not articles:
+        config.logger.info("No new articles found from RSS or HTML sources.")
+        return
 
-        articles = src.rsssource.get_rss_feeds(config, logger, db)
-        articles.extend(src.htmlsource.get_html_sources(config, logger))
+    # Filter articles
+    articles = config.news_filter.filter(articles)
+    
+    if not articles:
+        config.logger.info("No articles to post after filtering.")
+        return
+    
+    post_all_articles(articles, config) 
+    
 
-        if not articles:
-            logger.info("No new articles found from RSS or HTML sources.")
-            return
+def get_all_new_articles(config: Config) -> list[BskyPost]:
+        articles = src.rsssource.get_rss_feeds(config)
+        articles.extend(src.htmlsource.get_html_sources(config))
+        return articles
 
-        articles = filter.filter(articles)
+def post_all_articles(articles: list[BskyPost], config: Config):
+    bsky_account = config.get_bsky_account()
+    
+    for article in articles:
+        if not config.db.has_posted_article(article.link):
+            config.logger.info(f"Posting article: {article.headline}")
         
-        if not articles:
-            logger.info("No articles to post after filtering.")
-            return
-        
-        bsky_account = BskyAccount(config)
-        logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
-        
-        for article in articles:
-            if not db.has_posted_article(article.link):
-                logger.info(f"Posting article: {article.headline}")
-            
-                # After posting, record the article as posted
-                bsky_account.post_article(article)
-                db.record_posted_article(article.link)
-                time.sleep(5)
-    except Exception as e:
-        logger.exception("An error occurred in main()")
-        raise
-
+            # After posting, record the article as posted
+            article.post_to_bluesky(bsky_account)
+            config.db.record_posted_article(article.link)
+            time.sleep(5)
+    
 
 if __name__ == "__main__":
     main()

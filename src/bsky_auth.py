@@ -2,12 +2,16 @@ import sys
 import urllib3
 import json
 
+from src.bskypost import BskyPost
 from src.bsky_api_handler import BskyApiHandler
-from src.config import Config
 
 # BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
-    def __init__(self, config: Config):
+    def __init__(self, config):
+        from src.config import Config
+        if not isinstance(config, Config):
+            raise ValueError("config must be an instance of Config")
+        
         self.cfg = config
         self.bsky_api_handler = BskyApiHandler(self.cfg.get_logger())
 
@@ -44,5 +48,5 @@ class BskyAccount():
 
         return json.loads(api_key_response.data)["accessJwt"]
 
-    def post_article(self, article):
+    def post_article(self, article: BskyPost):
         self.bsky_api_handler.create_post(self, article)

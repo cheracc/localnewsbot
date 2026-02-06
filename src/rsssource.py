@@ -2,17 +2,18 @@ import feedparser
 import datetime
 import logging
 
-from src.config import Config
-from src.data import DatabaseManager
 from src.bskypost import BskyPost
 
 # RSS_Source handles parsing news articles from RSS feeds
 class RSS_Source():
-    def __init__(self, name: str, url: str, tag: str, db: DatabaseManager):
+    def __init__(self, name: str, url: str, tag: str, config):
+        from src.config import Config
+        if not isinstance(config, Config):
+            raise ValueError("config must be an instance of Config")
         self._name = name
         self._url = url
         self._tag = tag
-        self._db = db
+        self._db = config.db
 
     def get_articles(self, max_age) -> list[BskyPost]:
         return self.parse_rss(max_age)
@@ -67,11 +68,15 @@ class RSS_Source():
         return articles
     
 # Parse RSS feeds from config and return list of PostableArticle
-def get_rss_feeds(config: Config, logger: logging.Logger, db: DatabaseManager) -> list[BskyPost]:
+def get_rss_feeds(config) -> list[BskyPost]:
+    from src.config import Config
+    if not isinstance(config, Config):
+        raise ValueError("config must be an instance of Config")
+
     feeds = []
     rss_feeds = config.get_rss_feeds()
     for _, feed_info in rss_feeds.items():
-        feeds.append(RSS_Source(feed_info["name"], feed_info["url"], feed_info["tag"], db))
+        feeds.append(RSS_Source(feed_info["name"], feed_info["url"], feed_info["tag"], config))
 
     articles = []
 
@@ -80,9 +85,9 @@ def get_rss_feeds(config: Config, logger: logging.Logger, db: DatabaseManager) -
 
         # keep only the first x articles
         if feed_articles:
-            feed_articles = feed_articles[:config.max_articles_per_feed]
+            feed_articles = feed_articles[:config.get_max_articles_per_feed()]
 
         articles.extend(feed_articles)
-        logger.info(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
+        config.logger.info(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
 
     return articles

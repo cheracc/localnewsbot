@@ -41,10 +41,7 @@ class WebNewsSource:
         return articles
 
 # Parse HTML sources from config and return list of PostableArticle
-def get_html_sources(config: Config, logger: logging.Logger) -> list[BskyPost]:
-    if logger is None:
-        logger = logging.getLogger("htmlsource")
-    
+def get_html_sources(config: Config) -> list[BskyPost]:
     sources = []
     html_sources = config.get_html_sources()
     for _, source_info in html_sources.items():
@@ -57,9 +54,9 @@ def get_html_sources(config: Config, logger: logging.Logger) -> list[BskyPost]:
 
         # keep only the first x articles
         if source_articles:
-            source_articles = source_articles[:config.max_articles_per_feed]
+            source_articles = source_articles[:config.get_max_articles_per_feed()]
 
         articles.extend(source_articles)
-        logger.info(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
+        config.logger.info(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
 
     return articles
