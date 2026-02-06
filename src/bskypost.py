@@ -1,4 +1,3 @@
-# postablearticle.py
 # Definition of BskyPost class - represents an article to be posted
 import html
 import re
@@ -16,12 +15,15 @@ class BskyPost:
         self.img_url = img_url
         self.tag = tag
         self.created_at = created_at
+        self.post_text = None
+
+    
 
     def get_post_text(self, bsky_account):
         if self.formatted_text is None:
 #            self.formatted_text = self.format_post_text(tags_config)
             self.formatted_text = self.get_ai_summary(bsky_account)
-            if self.formatted_text == "":
+            if not self.formatted_text:
                 self.formatted_text = self.format_post_text(bsky_account.cfg.get_tags())
         return self.add_tags_to_post(bsky_account.cfg.get_tags())
 
@@ -29,8 +31,8 @@ class BskyPost:
         return tags.add_tags_to_post(self, tags_config)
 
     def post_to_bluesky(self, bsky_account):
-        post_text = self.get_post_text(bsky_account)
-        bsky_account.post_article(post_text)
+        self.post_text = self.get_post_text(bsky_account)
+        bsky_account.post_article(self)
 
     def format_post_text(self, tags_config) -> str:
         text = f"{self.headline}\n\n{self.description}"
@@ -65,7 +67,7 @@ class BskyPost:
             "handle": bsky_account.cfg.handle,
             "password": bsky_account.cfg.password,
             "embed_url": self.link,
-            "text": self.get_post_text(bsky_account)
+            "text": self.post_text
         }
     
     def get_ai_summary(self, bsky_account) -> str:

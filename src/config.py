@@ -1,7 +1,10 @@
 import datetime
 import os
 import sys
+from src.data import DatabaseManager
+from src.bsky_auth import BskyAccount
 from typing import Dict, Any, Optional
+from src.newsfilter import NewsFilter
 import yaml
 import logging
 
@@ -9,24 +12,31 @@ import logging
 class Config:
 
     def __init__(self):
-        self.__main_config = self.read_config("config/config.yml")
+        self.load_configs()
         self.logger = self.__create_logger()
-        self.logger.debug("config.yml loaded successfully")
+        self.bsky_account = None
+        self.db = DatabaseManager()
+        self.news_filter = NewsFilter(self)
+
+    def load_configs(self):
+        self.__main_config = self.read_config("config/config.yml")
         self.__feed_config = self.read_config("config/feeds.yml")
-        self.logger.debug("feeds.yml loaded successfully")
         self.__filter_config = self.read_config("config/filter.yml")
-        self.logger.debug("filter.yml loaded successfully")
         self.__tags_config = self.read_config("config/tags.yml")
-        self.logger.debug("tags.yml loaded successfully")
 
-
+    def init_bsky_account(self) -> BskyAccount:
         if 'bsky_handle' not in self.__main_config or 'bsky_password' not in self.__main_config:
             self.logger.error("config.yml must contain 'bsky_handle' and 'bsky_password' keys")
             sys.exit(1)
         
         self.handle = self.__main_config['bsky_handle']
         self.password = self.__main_config['bsky_password']
-        self.max_articles_per_feed = self.__main_config['max_articles_per_feed']
+        return BskyAccount(self)
+
+    def get_bsky_account(self) -> BskyAccount:
+        if self.bsky_account is None:
+            self.bsky_account = self.init_bsky_account()
+        return self.bsky_account
 
     def get_logger(self) -> logging.Logger:
         return self.logger
@@ -79,6 +89,12 @@ class Config:
         if not isinstance(log_level, str):
             raise ValueError("log_level in config must be a string")
         return log_level
+    
+    def get_max_articles_per_feed(self) -> int:
+        max_articles = self.__main_config.get("max_articles_per_feed", 10)
+        if not isinstance(max_articles, int):
+            raise ValueError("max_articles in config must be an integer")
+        return max_articles
     
     def max_article_age_days(self) -> Optional[int]:
         max_age = self.__main_config.get("max_article_age_days", None)

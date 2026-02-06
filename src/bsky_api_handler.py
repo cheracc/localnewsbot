@@ -4,14 +4,12 @@ this file was ripped directly from bluesky's official examples. some modificatio
 Script demonstrating how to create posts using the Bluesky API, covering most of the features and embed options.
 To run this Python script, you need the 'requests' and 'bs4' (BeautifulSoup) packages installed.
 """
-import html
 import re
 import logging
 import requests
-from typing import Dict, List, Any
+from typing import Dict, List
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
-from src.config import Config
 from src.rsssource import BskyPost
 
 class BskyApiHandler:
@@ -302,6 +300,10 @@ class BskyApiHandler:
         }
 
     def create_post(self, bsky_account, bsky_post: BskyPost):
+        from src.bsky_auth import BskyAccount
+        if not isinstance(bsky_account, BskyAccount):
+            raise ValueError("bsky_post must be an instance of BskyPost")
+
         args = bsky_post.get_post_args(bsky_account)
         session = self.bsky_login_session(args["pds_url"], args["handle"], args["password"])
 
