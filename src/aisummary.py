@@ -43,12 +43,6 @@ class Summarizer:
             return response.text if response and response.text else ""
         except Exception as e:
             self.logger.error(f"Error generating summary: {e}")
-            print("List of models that support generateContent:\n")
-            for m in self.client.models.list(): # type: ignore
-                for action in m.supported_actions:
-                    if action == "generateContent":
-                        print(m.name)
-
             return ""
     
     def is_enabled(self) -> bool:
