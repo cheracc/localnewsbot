@@ -18,11 +18,13 @@ class Summarizer:
         except Exception as e:
             self.logger.error(f"Error generating summary: {e}")
             print("List of models that support generateContent:\n")
-            for m in self.client.models.list(): # type: ignore
-                for action in m.supported_actions:
-                    if action == "generateContent":
-                        print(m.name)
-
+            models = self.client.models.list()
+            if models:
+                for m in models: # type: ignore
+                    if m.supported_actions:
+                        for action in m.supported_actions:
+                            if action == "generateContent":
+                                print(m.name)
             return ""
 
         return response.text if response and response.text else "No summary generated."

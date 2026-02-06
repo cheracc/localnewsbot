@@ -26,4 +26,6 @@ def add_tags_to_post(article, tags_config: Dict[str, list[str]]) -> str:
         allowed_post_length = 300 - len(tag_str) - 4  # -1 for a newline, -3 for ...
         post_text = post_text[:allowed_post_length].rstrip() + "…"
 
-    return f"{post_text}\n\n{tag_str}"
+
+
+    return f"{str(post_text).rstrip()}\n{tag_str}"
