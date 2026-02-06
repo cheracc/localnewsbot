@@ -40,8 +40,8 @@ class NewsFilter:
         #   filter(articles: list[PostableArticle], logger:logging.Logger) -> tuple[list[PostableArticle], list[PostableArticle]] 
         # function, which returns the filtered articles and the removed articles in that order. (See customfilters.py.example)
         try:
-            import customfilters
-            custom_filtered, custom_removed = customfilters.filter(working_articles, self.logger)
+            import src.customfilters
+            custom_filtered, custom_removed = src.customfilters.filter(working_articles, self.logger)
             working_articles = custom_filtered
             removed_articles.extend(custom_removed)
         except ImportError:

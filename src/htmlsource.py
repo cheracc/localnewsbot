@@ -1,9 +1,9 @@
+import datetime
 import logging
 import newspaper
 from src.config import Config
 from src.bskypost import BskyPost
-import src.htmlsource as htmlsource
-from newspaper import Article
+from newspaper import Article as HTMLArticle
 
 # WebNewsSource handles parsing news articles from HTML sources using the newspaper3k library
 class WebNewsSource:
@@ -20,7 +20,7 @@ class WebNewsSource:
         articles = []
         for art in news_site.articles[:10]:  # Limit to first 10 articles for performance
             try:
-                article = htmlsource.Article(art.url)
+                article = HTMLArticle(art.url)
                 article.download()
                 article.parse()
             except Exception as e:
@@ -33,7 +33,8 @@ class WebNewsSource:
                 headline=article.title,
                 description=article.meta_description or article.text[:200] + '...',
                 link=article.url.split('?')[0].split('#')[0],  # Remove query parameters and fragment identifiers for consistency
-                created_at=article.publish_date.strftime('%a, %d %b %Y %H:%M:%S %z') if article.publish_date else '',
+                img_url=article.top_image,
+                created_at=article.publish_date.strftime('%a, %d %b %Y %H:%M:%S %z') if isinstance(article.publish_date, datetime.datetime) else datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z'),
                 tag=self._tag
             )
             articles.append(extracted_article)
