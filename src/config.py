@@ -2,7 +2,7 @@ import datetime
 import os
 import sys
 from src.data import DatabaseManager
-from src.bsky_auth import BskyAccount
+from src.bsky_account import BskyAccount
 from typing import Dict, Any, Optional
 from src.newsfilter import NewsFilter
 import yaml
@@ -18,7 +18,7 @@ class Config:
         self.db = DatabaseManager()
         self.news_filter = NewsFilter(self)
 
-    def load_configs(self):
+    def load_configs(self) -> None:
         self.__main_config = self.read_config("config/config.yml")
         self.__feed_config = self.read_config("config/feeds.yml")
         self.__filter_config = self.read_config("config/filter.yml")
@@ -96,14 +96,14 @@ class Config:
             raise ValueError("max_articles in config must be an integer")
         return max_articles
     
-    def max_article_age_days(self) -> Optional[int]:
+    def max_article_age_days(self) -> int:
         max_age = self.__main_config.get("max_article_age_days", None)
         if max_age is not None:
             try:
                 return int(max_age)
             except ValueError:
                 raise ValueError("max_article_age_days in config must be an integer")
-        return None
+        return 10
     
     def get_tags(self) -> Dict[str, str]:
         return self.__tags_config

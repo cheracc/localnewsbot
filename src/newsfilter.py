@@ -6,7 +6,7 @@ class NewsFilter:
         self.config = config
         self.logger = config.get_logger()
 
-    def filter(self, articles):
+    def filter(self, articles: list['BskyPost']) -> list['BskyPost']: # type: ignore
         self.filteredwords = self.config.get_bad_words()
         goodwords = self.config.get_good_words()
         previously_posted = []
@@ -61,7 +61,7 @@ class NewsFilter:
         return working_articles
     
     # Applies headline, body, and URL filters
-    def filter_headlines(self, articles) -> tuple[list, list]:
+    def filter_headlines(self, articles: list['BskyPost']) -> tuple[list, list]: # type: ignore
         filtered_articles = []
         removed_articles = []
         for article in articles:
@@ -72,7 +72,7 @@ class NewsFilter:
                 self.logger.info(f"Excluding due to headline filter: {article.headline}")
         return filtered_articles, removed_articles
     
-    def filter_body(self, articles) -> tuple[list, list]:
+    def filter_body(self, articles: list['BskyPost']) -> tuple[list, list]: # type: ignore
         filtered_articles = []
         removed_articles = []
         for article in articles:
@@ -83,7 +83,7 @@ class NewsFilter:
                 self.logger.info(f"Excluding due to body filter: {article.headline}")
         return filtered_articles, removed_articles
     
-    def filter_url(self, articles) -> tuple[list, list]:
+    def filter_url(self, articles: list['BskyPost']) -> tuple[list, list]: # type: ignore
         filtered_articles = []
         removed_articles = []
         for article in articles:
