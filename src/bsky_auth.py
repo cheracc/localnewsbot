@@ -7,12 +7,12 @@ from src.config import Config
 
 # BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
-    def __init__(self, config: Config, bsky_api_handler: BskyApiHandler):
-        cfg = config
-        self.bsky_api_handler = bsky_api_handler
+    def __init__(self, config: Config):
+        self.cfg = config
+        self.bsky_api_handler = BskyApiHandler(self.cfg.get_logger())
 
-        self.handle = cfg.handle
-        self.password = cfg.password
+        self.handle = self.cfg.handle
+        self.password = self.cfg.password
         self.did = self.__get_did()
         self.apiKey = self.__get_api_key()
 
@@ -45,4 +45,4 @@ class BskyAccount():
         return json.loads(api_key_response.data)["accessJwt"]
 
     def post_article(self, article):
-        self.bsky_api_handler.create_post(self.bsky_api_handler.structure_post_from_article(self.handle, self.password, article))
+        self.bsky_api_handler.create_post(self, article)

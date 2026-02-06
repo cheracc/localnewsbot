@@ -11,7 +11,8 @@ import requests
 from typing import Dict, List, Any
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
-from src.rsssource import PostableArticle
+from src.config import Config
+from src.rsssource import BskyPost
 
 class BskyApiHandler:
     def __init__(self, logger: logging.Logger):
@@ -24,6 +25,21 @@ class BskyApiHandler:
         )
         resp.raise_for_status()
         return resp.json()
+    
+    def parse_hashtags(self, text: str) -> List[Dict]:
+        spans = []
+        hashtag_regex = rb"[$|\W](#([a-zA-Z0-9_]{1,30}))"
+        text_bytes = text.encode("UTF-8")
+        for m in re.finditer(hashtag_regex, text_bytes):
+            self.logger.debug(f"found hashtag: {m.group(1).decode('UTF-8')} at bytes {m.start(1)} to {m.end(1)}")
+            spans.append(
+                {
+                    "start": m.start(1),
+                    "end": m.end(1),
+                    "tag": m.group(1).decode("UTF-8"),
+                }
+            )
+        return spans
 
     def parse_mentions(self, text: str) -> List[Dict]:
         spans = []
@@ -93,6 +109,23 @@ class BskyApiHandler:
                             "$type": "app.bsky.richtext.facet#link",
                             # NOTE: URI ("I") not URL ("L")
                             "uri": u["url"],
+                        }
+                    ],
+                }
+            )
+
+        for h in self.parse_hashtags(text):
+            self.logger.debug(f"found hashtag: {h['tag']} at bytes {h['start']} to {h['end']}")
+            facets.append(
+                {
+                    "index": {
+                        "byteStart": h["start"],
+                        "byteEnd": h["end"],
+                    },
+                    "features": [
+                        {
+                            "$type": "app.bsky.richtext.facet#tag",
+                            "tag": h["tag"],
                         }
                     ],
                 }
@@ -191,19 +224,40 @@ class BskyApiHandler:
             "images": images,
         }
 
-    def fetch_embed_url_card(self, pds_url: str, access_token: str, url: str) -> Dict:
+    def fetch_embed_url_card(self, pds_url: str, access_token: str, bsky_post: BskyPost) -> Dict:
         # the required fields for an embed card
         card = {
-            "uri": url,
+            "uri": bsky_post.link,
             "title": "",
             "description": "",
         }
 
         # fetch the HTML
-        resp = requests.get(url)
-        #resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "html.parser")
+        try:
+            resp = requests.get(bsky_post.link)
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+        except requests.HTTPError as e:
+            self.logger.warning(f"Couldn't fetch embed card for URL {bsky_post.link}, will try to build one but it may be incomplete")
+            card["title"] = bsky_post.headline
+            card["description"] = bsky_post.description
+            img_url = bsky_post.img_url
+            if bsky_post.source_name and "ABC27" in bsky_post.tag:
+                img_url = "https://bloximages.newyork1.vip.townnews.com/lancasteronline.com/content/tncms/assets/v3/editorial/0/a7/0a74c5f8-fbb4-11e3-aec4-001a4bcf6878/53a99900b2301.image.png"
+            if img_url and len(img_url) > 0:
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                try:
+                    resp = requests.get(str(img_url).split("?")[0], headers=headers)  # strip query params which can cause issues with some CDNs
+                    resp.raise_for_status()
+                    card["thumb"] = self.upload_file(pds_url, access_token, img_url, resp.content)
+                except Exception as e:
+                    self.logger.warning(f"Could not fetch image for embed card: {bsky_post.img_url}")
+            return {
+                "$type": "app.bsky.embed.external",
+                "external": card,
+            }
 
+        # parse out OpenGraph tags if available
         title_tag = soup.find("meta", property="og:title")
         if title_tag:
             card["title"] = title_tag["content"]
@@ -216,7 +270,7 @@ class BskyApiHandler:
         if image_tag:
             img_url = image_tag["content"]
             if "://" not in img_url:
-                img_url = url + img_url
+                img_url = bsky_post.link + img_url
             resp = requests.get(img_url)
             try:
                 resp.raise_for_status()
@@ -247,7 +301,8 @@ class BskyApiHandler:
             },
         }
 
-    def create_post(self, args):
+    def create_post(self, bsky_account, bsky_post: BskyPost):
+        args = bsky_post.get_post_args(bsky_account.cfg)
         session = self.bsky_login_session(args["pds_url"], args["handle"], args["password"])
 
         # trailing "Z" is preferred over "+00:00"
@@ -281,7 +336,7 @@ class BskyApiHandler:
 
         elif args.get("embed_url"):
             post["embed"] = self.fetch_embed_url_card(
-                args["pds_url"], session["accessJwt"], args["embed_url"]
+                args["pds_url"], session["accessJwt"], bsky_post
             )
 
         resp = requests.post(
@@ -298,45 +353,9 @@ class BskyApiHandler:
             resp.raise_for_status()
         except Exception as e:
             self.logger.warning(f"failed to create record: {e}")
-            self.logger.debug(f"request body: {post}")
+            self.logger.debug(f"text length: {len(args['text'])} request body: {post}")
             try:
                 self.logger.debug(resp.text)
             except Exception:
                 pass
 
-    def structure_post_from_article(self, handle: str, password: str, article: PostableArticle) -> Dict[str, Any]:
-        args = {}
-        args["pds_url"] = "https://bsky.social"
-        args["handle"] = handle
-        args["password"] = password
-        args["embed_url"] = article.link
-        
-        text = f"{article.headline}\n\n{article.description}"
-
-        # convert HTML entities
-        text = html.unescape(text)
-
-        # handle <a href="...">text</a> => "text (url)"
-        def _replace_a(m):
-            href = m.group(1)
-            inner = re.sub(r'<[^>]+>', '', m.group(2) or '')
-            return f"{inner} ({href})"
-        text = re.sub(r'(?i)<\s*a\b[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)</\s*a\s*>', _replace_a, text)
-
-        # replace block-level tags with newlines
-        text = re.sub(r'(?i)<\s*(br|p|div|li|tr|h[1-6])\b[^>]*>', '\n', text)
-        text = re.sub(r'(?i)</\s*(p|div|li|tr|h[1-6])\s*>', '\n', text)
-
-        # remove any other tags
-        text = re.sub(r'<[^>]+>', '', text)
-
-        # normalize whitespace and newlines
-        text = text.replace('\r', '')
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        text = re.sub(r'[ \t]+', ' ', text).strip()
-
-        if len(text) > 300:
-            text = text[:297] + "..."
-
-        args["text"] = text
-        return args

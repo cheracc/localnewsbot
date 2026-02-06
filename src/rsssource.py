@@ -4,7 +4,7 @@ import logging
 
 from src.config import Config
 from src.data import DatabaseManager
-from src.postablearticle import PostableArticle
+from src.bskypost import BskyPost
 
 # RSS_Source handles parsing news articles from RSS feeds
 class RSS_Source():
@@ -14,16 +14,16 @@ class RSS_Source():
         self._tag = tag
         self._db = db
 
-    def get_articles(self, max_age) -> list[PostableArticle]:
+    def get_articles(self, max_age) -> list[BskyPost]:
         return self.parse_rss(max_age)
 
-    def parse_rss(self, max_age) -> list[PostableArticle]:
+    def parse_rss(self, max_age) -> list[BskyPost]:
         try:
             feed = feedparser.parse(self._url)
         except Exception:
             logging.exception(f"Failed to parse RSS feed {self._name}")
             return []
-        
+
         articles = []
         for entry in feed.entries:
             if self._db.has_posted_article(entry.link) or self._db.is_excluded(entry.link):
@@ -48,18 +48,26 @@ class RSS_Source():
                     if (datetime.datetime.now() - published_dt) > datetime.timedelta(days=int(max_age)):
                         continue
 
-            article = PostableArticle(
+            img_url = ""
+            if entry.get("enclosures") and len(entry.enclosures) > 0:
+                enc_url = entry.enclosures[0]
+                if any(ext in str(enc_url).lower() for ext in ["jpg", "jpeg", "png", "gif"]):
+                    img_url = enc_url
+
+            article = BskyPost(
                 source_name=self._name,
                 headline=entry.title,
                 description=entry.description,
                 link=entry.link,
-                created_at=entry.published
+                img_url=img_url,
+                created_at=entry.published,
+                tag=self._tag
             )
             articles.append(article)
         return articles
     
 # Parse RSS feeds from config and return list of PostableArticle
-def get_rss_feeds(config: Config, logger: logging.Logger, db: DatabaseManager) -> list[PostableArticle]:
+def get_rss_feeds(config: Config, logger: logging.Logger, db: DatabaseManager) -> list[BskyPost]:
     feeds = []
     rss_feeds = config.get_rss_feeds()
     for _, feed_info in rss_feeds.items():
@@ -78,4 +86,3 @@ def get_rss_feeds(config: Config, logger: logging.Logger, db: DatabaseManager) -
         logger.info(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
 
     return articles
-
