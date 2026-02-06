@@ -1,7 +1,7 @@
 from typing import Dict
 
 
-def _assign_tags_from_keywords(article, tags_config: Dict[str, list[str]]) -> list[str]:
+def _assign_tags_from_keywords(article: 'BskyPost', tags_config: Dict[str, list[str]]) -> list[str]: # type: ignore
     assigned_tags = []
     article_text = f"{article.headline} {article.description}".lower()
 
@@ -13,7 +13,7 @@ def _assign_tags_from_keywords(article, tags_config: Dict[str, list[str]]) -> li
 
     return assigned_tags
 
-def add_tags_to_post(article, tags_config: Dict[str, list[str]]) -> str:
+def add_tags_to_post(article: 'BskyPost', tags_config: Dict[str, list[str]]) -> str: # type: ignore
     tags = _assign_tags_from_keywords(article, tags_config)
     tags.append(article.tag)  # Include the tag of the source
     post_text = article.formatted_text

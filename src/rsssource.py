@@ -15,10 +15,10 @@ class RSS_Source():
         self._tag = tag
         self._db = config.db
 
-    def get_articles(self, max_age) -> list[BskyPost]:
+    def get_articles(self, max_age: int) -> list[BskyPost]:
         return self.parse_rss(max_age)
 
-    def parse_rss(self, max_age) -> list[BskyPost]:
+    def parse_rss(self, max_age: int) -> list[BskyPost]:
         try:
             feed = feedparser.parse(self._url)
         except Exception:
@@ -27,7 +27,8 @@ class RSS_Source():
 
         articles = []
         for entry in feed.entries:
-            if self._db.has_posted_article(entry.link) or self._db.is_excluded(entry.link):
+            link = str(entry.link)
+            if self._db.has_posted_article(link) or self._db.is_excluded(link):
                 continue
 
             # skip if article older than configured max age
@@ -35,13 +36,13 @@ class RSS_Source():
             if max_age is not None and max_age > 0:
                 published_dt = None
                 if getattr(entry, "published_parsed", None):
-                    published_dt = datetime.datetime(*entry.published_parsed[:6])
+                    published_dt = datetime.datetime(*entry.published_parsed[:6]) # type: ignore
                 elif getattr(entry, "published", None):
                     try:
-                        published_dt = datetime.datetime.fromisoformat(entry.published)
+                        published_dt = datetime.datetime.fromisoformat(str(entry.published))
                     except Exception:
                         try:
-                            published_dt = datetime.datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %Z")
+                            published_dt = datetime.datetime.strptime(str(entry.published), "%a, %d %b %Y %H:%M:%S %Z")
                         except Exception:
                             published_dt = None
 
@@ -68,10 +69,8 @@ class RSS_Source():
         return articles
     
 # Parse RSS feeds from config and return list of PostableArticle
-def get_rss_feeds(config) -> list[BskyPost]:
-    from src.config import Config
-    if not isinstance(config, Config):
-        raise ValueError("config must be an instance of Config")
+def get_rss_feeds(config: 'Config') -> list[BskyPost]: # type: ignore
+    # from src.config import Config # This import is not needed here due to the type hint 'Config'
 
     feeds = []
     rss_feeds = config.get_rss_feeds()

@@ -300,7 +300,7 @@ class BskyApiHandler:
         }
 
     def create_post(self, bsky_account, bsky_post: BskyPost):
-        from src.bsky_auth import BskyAccount
+        from src.bsky_account import BskyAccount
         if not isinstance(bsky_account, BskyAccount):
             raise ValueError("bsky_post must be an instance of BskyPost")
 

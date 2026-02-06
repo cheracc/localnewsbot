@@ -7,6 +7,7 @@ from src.bsky_api_handler import BskyApiHandler
 
 # BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
+    
     def __init__(self, config):
         from src.config import Config
         if not isinstance(config, Config):
@@ -20,7 +21,7 @@ class BskyAccount():
         self.did = self.__get_did()
         self.apiKey = self.__get_api_key()
 
-    def __get_did(self):
+    def __get_did(self) -> str:
         http = urllib3.PoolManager()
         DID_URL = "https://bsky.social/xrpc/com.atproto.identity.resolveHandle"
         did_resolve = http.request("GET", DID_URL, fields={"handle": self.handle})
@@ -31,7 +32,7 @@ class BskyAccount():
         else:
             return json.loads(did_resolve.data)["did"]
 
-    def __get_api_key(self):
+    def __get_api_key(self) -> str:
         http = urllib3.PoolManager()
         API_KEY_URL = "https://bsky.social/xrpc/com.atproto.server.createSession"
 
@@ -48,5 +49,5 @@ class BskyAccount():
 
         return json.loads(api_key_response.data)["accessJwt"]
 
-    def post_article(self, article: BskyPost):
+    def post_article(self, article: BskyPost) -> None:
         self.bsky_api_handler.create_post(self, article)
