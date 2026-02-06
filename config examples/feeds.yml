@@ -1,0 +1,19 @@
+rss_feeds:
+  abc27local:
+    name: "ABC27 Local News" # the friendly name for the feed, only used in logging atm
+    url: "https://www.abc27.com/local-news/rss" # the URL of the RSS feed to pull articles from
+    tag: "ABC27" # the #tag to add to posts from this feed
+  pennlive:
+    name: "PennLive"
+    url: "https://www.pennlive.com/arc/outboundfeeds/rss/"
+    tag: "PennLive"
+html_sources:
+  cbs21:
+    name: "CBS21 News"
+    url: "https://local21news.com/news/local"
+    tag: "CBS21"
+  spotlightpa:
+    name: "Spotlight PA"
+    url: "https://www.spotlightpa.org/"
+    tag: "SpotlightPA"
+  
