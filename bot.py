@@ -43,8 +43,7 @@ def main():
             logger.info("No articles to post after filtering.")
             return
         
-        bsky_api_handler = BskyApiHandler(logger)
-        bsky_account = BskyAccount(config, bsky_api_handler)
+        bsky_account = BskyAccount(config)
         logger.debug("BskyAccount %s connected and initialized", bsky_account.handle)
         
         for article in articles:
