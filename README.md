@@ -11,6 +11,7 @@ My bot can be found at [@hbgpalocalnews.bsky.social](https://bsky.app/profile/hb
 * **Rich Embeds:** Supports posting with titles, descriptions, and article links.
 * **Deduplication:** Ensures the same news story isn't posted multiple times (uses sqlite).
 * **Headless Operation:** This is a simple python script that can be run on anything that runs python.
+* **AI Summaries!** Optionally uses Google AI Studio to generate articles summaries for posts.
 
 ## 🛠️ Tech Stack
 
