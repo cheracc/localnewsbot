@@ -98,6 +98,7 @@ def get_rss_feeds(config: Config) -> list[BskyPost]: # type: ignore
             feed_articles = feed_articles[:config.get_max_articles_per_feed()]
 
         articles.extend(feed_articles)
-        config.logger.info(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
+        config.logger.debug(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
 
+    config.logger.info(f"Fetched {len(articles)} articles from RSS feeds.")
     return articles
