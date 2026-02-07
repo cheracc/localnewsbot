@@ -4,6 +4,7 @@ max_articles_per_feed: 10
 max_article_age_days: 7
 # log_level can be one of: DEBUG, INFO, WARNING
 log_level: "INFO"
+pds_url: "https://bsky.social"
 gemini_api_key: "Aasdf67s9a8d7f69asd876f9a8sd76f9as8d76f9 your key"
 #gemini_model: "gemma-3-27b-it" gemma models have high free rate quotas, these 2 seem to perform best for this, try
 gemini_model: "gemma-3n-e4b-it"
