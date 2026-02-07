@@ -1,5 +1,6 @@
 bsky_handle: "yourbothandle.bsky.social"
 bsky_password: "your-bots-app-paswd"
+delay_between_posts_in_seconds: 2
 max_articles_per_feed: 10
 max_article_age_days: 7
 # log_level can be one of: DEBUG, INFO, WARNING
@@ -8,4 +9,11 @@ pds_url: "https://bsky.social"
 gemini_api_key: "Aasdf67s9a8d7f69asd876f9a8sd76f9as8d76f9 your key"
 #gemini_model: "gemma-3-27b-it" gemma models have high free rate quotas, these 2 seem to perform best for this, try
 gemini_model: "gemma-3n-e4b-it"
-ai_summary_prompt: "Summarize this article very briefly and concisely, in fewer than 220 characters, as you might see a non-biased individual do when they share the link on Bluesky. Here is the article: "
+ai_summary_prompt: "Summarize this article very briefly and concisely, in fewer than 220 characters. 
+  Write as if you were a non-biased resident of the [your local] area sharing important information with 
+  other area residents. It is very important that it is no longer than 220 characters. Do not add any 
+  hashtags. Do not add any lead-ins. These news articles should all be from the south central pennsylvania 
+  area, so do not assume they are referring to anything outside this region. Do not use proper names of 
+  crime victims, perpetrators, or accident victims in your summary. If there is not enough text to summarize,
+  rephrase the headline or simply use it as your summary. Do not state the character count or any other 
+  analysis of your output. Here is the article: "
