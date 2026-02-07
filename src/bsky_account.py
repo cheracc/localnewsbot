@@ -27,6 +27,9 @@ class BskyAccount():
     def post_article(self, article: BskyPost) -> None:
         self.bsky_api_handler.create_post(self, article)
 
+    def get_session_string(self) -> str:
+        return self.get_session()["accessJwt"]
+
     def get_session(self) -> Dict[str, Any]:
         # First check if we already have a session token
         if self.session and self.session["refreshJwt"]:
