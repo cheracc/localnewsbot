@@ -123,6 +123,10 @@ class Config:
     def get_ai_summary_prompt(self) -> str:
         return self.__main_config.get("ai_summary_prompt", "")
 
+    def get_delay_between_posts_seconds(self) -> int:
+        return self.__main_config.get("delay_between_posts_in_seconds", 3)
+    
+
     def save_config(self, path: str, data: Dict[str, Any]) -> None:
         with open(path, "w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
