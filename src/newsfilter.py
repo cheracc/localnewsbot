@@ -70,7 +70,7 @@ class NewsFilter:
 
         self.logger.info("The following articles (headlines) were removed by filters:")
         for article in removed_articles:
-            self.logger.info(f"{article.headline}")
+            self.logger.info(f"  -  {article.headline}")
         
 
         return working_articles
@@ -84,7 +84,7 @@ class NewsFilter:
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
-                self.logger.info(f"Excluding due to headline filter: {article.headline}")
+                self.logger.debug(f"Excluding due to headline filter: {article.headline}")
         return filtered_articles, removed_articles
     
     def filter_body(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]:
@@ -95,7 +95,7 @@ class NewsFilter:
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
-                self.logger.info(f"Excluding due to body filter: {article.headline}")
+                self.logger.debug(f"Excluding due to body filter: {article.headline}")
         return filtered_articles, removed_articles
     
     def filter_url(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]:
@@ -109,5 +109,5 @@ class NewsFilter:
                 self.logger.debug(f"URL passed filter: {article.link}")
             else:
                 removed_articles.append(article)
-                self.logger.info(f"Excluding due to URL filter: {article.headline}")
+                self.logger.debug(f"Excluding due to URL filter: {article.headline}")
         return filtered_articles, removed_articles
