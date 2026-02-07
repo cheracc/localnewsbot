@@ -19,9 +19,12 @@ def main():
     
 
 def fetch_filter_and_post(config: Config):
+    start_time = time.time()
     # Check all RSS and HTML feeds for articles that haven't been posted
     articles = get_all_new_articles(config)
     if not articles:
+        elapsed = time.time() - start_time
+        config.logger.info(f"Finished({elapsed:.2f}s): No new articles found.")
         return
 
     # Filter articles
@@ -29,20 +32,21 @@ def fetch_filter_and_post(config: Config):
     articles = config.news_filter.filter(articles)
     
     if not articles:
-        config.logger.info("No articles to post after filtering.")
+        elapsed = time.time() - start_time
+        config.logger.info(f"Finished({elapsed:.2f}s): No articles to post after filtering.")
         return
     
     config.logger.info(f"Posting {len(articles)} articles.")
-    post_all_articles(articles, config) 
-    config.logger.info(f"Fetched {total_fetched}, filtered {total_fetched - len(articles)}, and posted {len(articles)} articles.")
+    post_all_articles(articles, config)
+    elapsed = time.time() - start_time
+    config.logger.info(f"Finished({elapsed:.2f}s): Fetched: {total_fetched}, Filtered: {total_fetched - len(articles)}, Posted: {len(articles)}")
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
         start_time = time.time()
-        config.logger.info("Checking for new articles...")
+        config.logger.info("LocalNewsBot is checking for new articles...")
         articles = src.rsssource.get_rss_feeds(config)
         articles.extend(src.htmlsource.get_html_sources(config))
         if not articles:
-            config.logger.info("No new articles found.")
             return []
         config.logger.info(f"Fetched {len(articles)} articles in {time.time() - start_time:.2f} seconds.")
         return articles
