@@ -105,7 +105,6 @@ class BskyApiHandler:
             )
 
         for h in self.parse_hashtags(text):
-            self.logger.debug(f"found hashtag: {h['tag']} at bytes {h['start']} to {h['end']}")
             facets.append(
                 {
                     "index": {
