@@ -26,8 +26,10 @@ def main():
         config.logger.info("No articles to post after filtering.")
         return
     
+    config.logger.info(f"Posting {len(articles)} articles.")
     post_all_articles(articles, config) 
-    
+    config.logger.info("Done.")
+
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
         articles = src.rsssource.get_rss_feeds(config)
