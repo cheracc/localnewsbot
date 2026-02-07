@@ -60,6 +60,7 @@ def get_html_sources(config: Config) -> list[BskyPost]:
             source_articles = source_articles[:config.get_max_articles_per_feed()]
 
         articles.extend(source_articles)
-        config.logger.info(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
+        config.logger.debug(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
 
+    config.logger.info(f"Fetched {len(articles)} articles from HTML sources.")
     return articles

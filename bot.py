@@ -33,13 +33,17 @@ def main():
 
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
+        start_time = time.time()
+        config.logger.info("Checking for new articles...")
         articles = src.rsssource.get_rss_feeds(config)
         articles.extend(src.htmlsource.get_html_sources(config))
+        if not articles:
+            config.logger.info("No new articles found.")
+            return []
+        config.logger.info(f"Fetched {len(articles)} articles in {time.time() - start_time:.2f} seconds.")
         return articles
 
 def post_all_articles(articles: list[BskyPost], config: Config):
-    bsky_account = config.get_bsky_account()
-    
     for article in articles:
         if not config.db.has_posted_article(article.link):
             config.logger.info(f"Posting article: {article.headline}")
