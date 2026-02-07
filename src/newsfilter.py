@@ -29,6 +29,7 @@ class NewsFilter:
         # Apply headline, body, and URL filters, splitting them into filtered and removed articles
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
         removed_articles = []
+        super_removed_articles = []
 
         for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
             keep, toss = filter_fn(working_articles)
@@ -41,9 +42,10 @@ class NewsFilter:
         # function, which returns the filtered articles and the removed articles in that order. (See customfilters.py.example)
         try:
             import src.customfilters
-            custom_filtered, custom_removed = src.customfilters.filter(working_articles, self.logger)
+            custom_filtered, custom_removed, super_removed = src.customfilters.filter(working_articles, self.logger)
             working_articles = custom_filtered
             removed_articles.extend(custom_removed)
+            super_removed_articles.extend(super_removed)
         except ImportError:
             pass
 
@@ -52,6 +54,8 @@ class NewsFilter:
                 self.logger.info(f"Restoring due to ok phrase match: {article.headline}")
                 working_articles.append(article)
                 removed_articles.remove(article)
+
+        removed_articles.extend(super_removed_articles)
 
         for article in removed_articles:
             self.data.record_excluded_article(article.link)
