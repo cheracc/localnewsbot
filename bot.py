@@ -45,8 +45,6 @@ def get_all_new_articles(config: Config) -> list[BskyPost]:
 def post_all_articles(articles: list[BskyPost], config: Config):
     for article in articles:
         if not config.db.has_posted_article(article.link):
-            config.logger.info(f"Posting article: {article.headline}")
-        
             # After posting, record the article as posted
             article.post_to_bluesky()
             config.db.record_posted_article(article.link)
