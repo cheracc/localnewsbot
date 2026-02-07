@@ -89,10 +89,14 @@ class BskyAccount():
             self.pds_url + "/xrpc/com.atproto.server.refreshSession",
             headers={"Authorization": "Bearer " + self.session["refreshJwt"]},
         )
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            self.config.logger.warning(f"bsky_account.bsky_refresh_session(): Error refreshing session: {e}. Using handle/password instead")
+            self.__login_with_handle_password()
+            return
+
         self.session = resp.json()
-
-
         if self.session["accessJwt"] and self.session["refreshJwt"]:
             self.config.logger.debug("Successfully refreshed bsky session token")
             self.config.save_session()
