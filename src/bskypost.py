@@ -22,7 +22,7 @@ class BskyPost:
             self.formatted_text = self.get_ai_summary(bsky_account)
             if not self.formatted_text:
                 self.formatted_text = self.format_post_text()
-        return self.add_tags_to_post(bsky_account.cfg.get_tags())
+        return self.add_tags_to_post(bsky_account.config.get_tags())
 
     def add_tags_to_post(self, tags_config: Dict[str, Any]) -> str:
         return tags.add_tags_to_post(self, tags_config)
@@ -61,12 +61,12 @@ class BskyPost:
     def get_post_args(self, bsky_account: 'BskyAccount') -> dict: # type: ignore
         return {
             "pds_url": "https://bsky.social",
-            "handle": bsky_account.cfg.handle,
-            "password": bsky_account.cfg.password,
+            "handle": bsky_account.config.handle,
+            "password": bsky_account.config.password,
             "embed_url": self.link,
             "text": self.post_text
         }
     
     def get_ai_summary(self, bsky_account: 'BskyAccount') -> str: # type: ignore
-        ai = Summarizer(bsky_account.cfg)
+        ai = Summarizer(bsky_account.config)
         return ai.summarize(self.link)

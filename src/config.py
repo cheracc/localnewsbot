@@ -23,6 +23,10 @@ class Config:
         self.__feed_config = self.read_config("config/feeds.yml")
         self.__filter_config = self.read_config("config/filter.yml")
         self.__tags_config = self.read_config("config/tags.yml")
+        try:
+            self.__session = self.read_config("config/session.yml")
+        except FileNotFoundError:
+            self.__session = {}
 
     def init_bsky_account(self) -> BskyAccount:
         if 'bsky_handle' not in self.__main_config or 'bsky_password' not in self.__main_config:
@@ -46,13 +50,10 @@ class Config:
             with open(path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
         except FileNotFoundError:
-            self.logger.error(f"Config file {path} not found")
-            sys.exit(1)
-
+            return {}
+        
         if not isinstance(data, dict):
-            sys.exit(1)
-            raise ValueError(f"{path} does not contain a YAML mapping at top level")
-
+            return {}
         return data
 
     # Returns the RSS feeds from config
@@ -116,7 +117,24 @@ class Config:
     
     def get_ai_summary_prompt(self) -> str:
         return self.__main_config.get("ai_summary_prompt", "")
+
+    def save_config(self, path: str, data: Dict[str, Any]) -> None:
+        with open(path, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+
+    def get_saved_session(self) -> Dict:
+        return self.__session if self.__session else {}
     
+    def get_pds_url(self) -> str:
+        return self.__main_config.get("pds_url", "https://bsky.social")
+
+    def save_session(self) -> None:
+        if self.get_bsky_account().session:
+            self.__session = self.get_bsky_account().session
+            self.save_config("config/session.yml", self.__session)
+            # Save the updated config
+            self.logger.info("Bsky session saved to session.yml")
+        
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")
 

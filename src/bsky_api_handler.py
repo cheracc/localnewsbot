@@ -16,14 +16,6 @@ class BskyApiHandler:
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
-    def bsky_login_session(self, pds_url: str, handle: str, password: str) -> Dict:
-        resp = requests.post(
-            pds_url + "/xrpc/com.atproto.server.createSession",
-            json={"identifier": handle, "password": password},
-        )
-        resp.raise_for_status()
-        return resp.json()
-    
     def parse_hashtags(self, text: str) -> List[Dict]:
         spans = []
         hashtag_regex = rb"[$|\W](#([a-zA-Z0-9_]{1,30}))"
@@ -305,7 +297,7 @@ class BskyApiHandler:
             raise ValueError("bsky_post must be an instance of BskyPost")
 
         args = bsky_post.get_post_args(bsky_account)
-        session = self.bsky_login_session(args["pds_url"], args["handle"], args["password"])
+        session = bsky_account.get_session()
 
         # trailing "Z" is preferred over "+00:00"
         now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
