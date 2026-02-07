@@ -31,9 +31,10 @@ class BskyPost:
             self.post_text = self.format_post_text()
         return self.post_text
 
-    def add_tags_to_post(self) -> str:
-        post_text, _ = tags.add_tags_to_post(self, self.config.get_tags())
-        return post_text
+    def add_tags_to_post(self) -> tuple[str, str]:
+        post_text, tag_str = tags.add_tags_to_post(self, self.config.get_tags())
+        return post_text, tag_str
+
 
     def post_to_bluesky(self) -> None: 
         self.config.logger.info(f"Posting article: {self.headline}")
