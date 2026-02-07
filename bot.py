@@ -11,10 +11,16 @@ def main():
 	# bail on connections if we don't have anything in 20 seconds
     socket.setdefaulttimeout(20)
     config = Config() # loads config files and sets up database and api
+
+    try:
+        fetch_filter_and_post(config)
+    except Exception as e:
+        config.logger.error(f"An error occurred: {e}")
     
+
+def fetch_filter_and_post(config: Config):
     # Check all RSS and HTML feeds for articles that haven't been posted
     articles = get_all_new_articles(config)
-    
     if not articles:
         return
 
@@ -29,7 +35,6 @@ def main():
     config.logger.info(f"Posting {len(articles)} articles.")
     post_all_articles(articles, config) 
     config.logger.info(f"Fetched {total_fetched}, filtered {total_fetched - len(articles)}, and posted {len(articles)} articles.")
-
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
         start_time = time.time()
