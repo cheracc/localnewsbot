@@ -10,7 +10,7 @@ from src.config import Config
 def main():
 	# bail on connections if we don't have anything in 20 seconds
     socket.setdefaulttimeout(20)
-    config = Config()
+    config = Config() # loads config files and sets up database and api
     
     # Check all RSS and HTML feeds for articles that haven't been posted
     articles = get_all_new_articles(config)
