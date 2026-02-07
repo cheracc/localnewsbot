@@ -1,4 +1,6 @@
 import sys
+from typing import Dict
+import requests
 import urllib3
 import json
 
@@ -8,18 +10,38 @@ from src.bsky_api_handler import BskyApiHandler
 # BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
     
-    def __init__(self, config):
+    def __init__(self, config: 'Config'): # type: ignore
+        self.config = config
         from src.config import Config
         if not isinstance(config, Config):
             raise ValueError("config must be an instance of Config")
-        
-        self.cfg = config
-        self.bsky_api_handler = BskyApiHandler(self.cfg.get_logger())
-
-        self.handle = self.cfg.handle
-        self.password = self.cfg.password
+        self.bsky_api_handler = BskyApiHandler(self.config.get_logger())
+        self.pds_url = self.config.get_pds_url()
+        self.handle = self.config.handle
+        self.password = self.config.password
         self.did = self.__get_did()
         self.apiKey = self.__get_api_key()
+        self.session = {}
+
+    def post_article(self, article: BskyPost) -> None:
+        self.bsky_api_handler.create_post(self, article)
+
+    def get_session(self) -> Dict:
+        # First check if we already have a session token
+        if self.session and self.session["refreshJwt"]:
+            # We do, refresh it first then return it
+            self.__refresh_session()
+            return self.session
+        
+        # Didn't have a session, so try to load it from config
+        self.session = self.config.get_saved_session()
+        if self.session:
+            # found one in config, try to refresh it - if it's old or invalid, this will use handle/password instead
+            self.__refresh_session()
+        else:
+            # there was no session saved anywhere, so use handle/password
+            self.__login_with_handle_password()
+        return self.session
 
     def __get_did(self) -> str:
         http = urllib3.PoolManager()
@@ -49,5 +71,35 @@ class BskyAccount():
 
         return json.loads(api_key_response.data)["accessJwt"]
 
-    def post_article(self, article: BskyPost) -> None:
-        self.bsky_api_handler.create_post(self, article)
+    def __login_with_handle_password(self) -> None:
+        resp = requests.post(
+            self.pds_url + "/xrpc/com.atproto.server.createSession",
+            json={"identifier": self.handle, "password": self.password},
+        )
+        resp.raise_for_status()
+        self.session = resp.json()
+    
+    def __refresh_session(self) -> None:
+        if not self.session or not self.session["refreshJwt"]:
+            self.config.logger.warning("bsky_account.bsky_refresh_session(): No session to refresh. Using handle/password instead")
+            self.__login_with_handle_password()
+            return
+
+        resp = requests.post(
+            self.pds_url + "/xrpc/com.atproto.server.refreshSession",
+            headers={"Authorization": "Bearer " + self.session["refreshJwt"]},
+        )
+        resp.raise_for_status()
+        self.session = resp.json()
+
+
+        if self.session["accessJwt"] and self.session["refreshJwt"]:
+            self.config.logger.debug("Successfully refreshed bsky session token")
+            self.config.save_session()
+            return
+        
+        else:
+            self.config.logger.warning(f"bsky_account.bsky_refresh_session(): Error refreshing session: {self.session}")
+            self.__login_with_handle_password()
+            return
+
