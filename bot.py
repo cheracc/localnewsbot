@@ -20,6 +20,7 @@ def main():
         return
 
     # Filter articles
+    total_fetched = len(articles)
     articles = config.news_filter.filter(articles)
     
     if not articles:
@@ -28,7 +29,7 @@ def main():
     
     config.logger.info(f"Posting {len(articles)} articles.")
     post_all_articles(articles, config) 
-    config.logger.info("Done.")
+    config.logger.info(f"Fetched {total_fetched}, filtered {total_fetched - len(articles)}, and posted {len(articles)} articles.")
 
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
