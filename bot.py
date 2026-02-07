@@ -16,7 +16,6 @@ def main():
     articles = get_all_new_articles(config)
     
     if not articles:
-        config.logger.info("No new articles found from RSS or HTML sources.")
         return
 
     # Filter articles
