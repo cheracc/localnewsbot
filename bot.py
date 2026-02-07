@@ -20,6 +20,7 @@ def main():
 
 def fetch_filter_and_post(config: Config):
     start_time = time.time()
+    start_time = time.time()
     # Check all RSS and HTML feeds for articles that haven't been posted
     articles = get_all_new_articles(config)
     if not articles:
@@ -40,9 +41,13 @@ def fetch_filter_and_post(config: Config):
     post_all_articles(articles, config)
     elapsed = time.time() - start_time
     config.logger.info(f"Finished({elapsed:.2f}s): Fetched: {total_fetched}, Filtered: {total_fetched - len(articles)}, Posted: {len(articles)}")
+    post_all_articles(articles, config)
+    elapsed = time.time() - start_time
+    config.logger.info(f"Finished({elapsed:.2f}s): Fetched: {total_fetched}, Filtered: {total_fetched - len(articles)}, Posted: {len(articles)}")
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
         start_time = time.time()
+        config.logger.info("LocalNewsBot is checking for new articles...")
         config.logger.info("LocalNewsBot is checking for new articles...")
         articles = src.rsssource.get_rss_feeds(config)
         articles.extend(src.htmlsource.get_html_sources(config))
