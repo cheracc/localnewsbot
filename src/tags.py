@@ -1,7 +1,9 @@
-from typing import Dict
+from __future__ import annotations
+from typing import Dict, TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.bsky_post import BskyPost
 
-
-def _assign_tags_from_keywords(article: 'BskyPost', tags_config: Dict[str, list[str]]) -> list[str]: # type: ignore
+def _assign_tags_from_keywords(article: BskyPost, tags_config: Dict[str, list[str]]) -> list[str]: 
     assigned_tags = []
     article_text = f"{article.headline} {article.description} {article.link}".replace("\n", " ")
     article_text = article_text.replace("-", " ").replace("_", " ").replace("/", " ").replace(".", " ").replace(",", " ").replace(":", " ").lower()
@@ -14,10 +16,10 @@ def _assign_tags_from_keywords(article: 'BskyPost', tags_config: Dict[str, list[
 
     return assigned_tags
 
-def add_tags_to_post(article: 'BskyPost', tags_config: Dict[str, list[str]]) -> str: # type: ignore
+def add_tags_to_post(article: BskyPost, tags_config: Dict[str, list[str]]) -> str:
     tags = _assign_tags_from_keywords(article, tags_config)
     tags.append(article.tag)  # Include the tag of the source
-    post_text = article.formatted_text
+    post_text = article.get_post_text()
     if not tags:
         return post_text
     tag_str = " ".join(f"#{tag} " for tag in tags)

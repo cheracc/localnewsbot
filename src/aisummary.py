@@ -1,8 +1,13 @@
+from __future__ import annotations
 from google import genai
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.config import Config
+
 
 # Summarizer uses google GenAI to summarize a news article
 class Summarizer:
-    def __init__(self, config: 'Config'): # type: ignore
+    def __init__(self, config: Config): 
         self.client = genai.Client(api_key=config.get_gemini_api_key())
         self.logger = config.get_logger()
         self.prompt = config.get_ai_summary_prompt()
