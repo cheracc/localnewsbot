@@ -2,6 +2,7 @@
 from __future__ import annotations
 import html
 import re
+import time
 import src.tags as tags
 from src.aisummary import Summarizer
 from typing import Any, Dict, TYPE_CHECKING
@@ -26,16 +27,24 @@ class BskyPost:
         if not self.post_text:
             self.post_text = self.get_ai_summary()
         if not self.post_text:
+            self.config.logger.debug("Could not get AI summary, falling back to headline and description.")
             self.post_text = self.format_post_text()
         return self.post_text
 
     def add_tags_to_post(self) -> str:
-        return tags.add_tags_to_post(self, self.config.get_tags())
+        post_text, _ = tags.add_tags_to_post(self, self.config.get_tags())
+        return post_text
 
     def post_to_bluesky(self) -> None: 
+        self.config.logger.info(f"Posting article: {self.headline}")
+        start_time = time.time()
         self.post_text = self.get_post_text()
-        self.post_text = self.add_tags_to_post()
+        self.config.logger.debug(f"  Generated post text: {self.post_text}")
+        self.post_text, tag_str = self.add_tags_to_post()
+        self.config.logger.debug(f"  Keyword matched tags: {tag_str}")
         self.config.get_bsky_account().post_article(self)
+        end_time = time.time()
+        self.config.logger.info(f"  Finished posting to Bluesky ({end_time - start_time:.2f} seconds)")
 
     def format_post_text(self) -> str:
         text = f"{self.headline}\n\n{self.description}"
@@ -74,5 +83,6 @@ class BskyPost:
         }
     
     def get_ai_summary(self) -> str:
-
-        return self.config.get_summarizer().summarize(self.link)
+        self.config.logger.info(f"  Generating AI summary for {self.headline}")
+        response = self.config.get_summarizer().summarize(self.link)
+        return response
