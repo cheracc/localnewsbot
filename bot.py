@@ -52,13 +52,16 @@ def get_all_new_articles(config: Config) -> list[BskyPost]:
         return articles
 
 def post_all_articles(articles: list[BskyPost], config: Config):
-    for article in articles:
+    for i, article in enumerate(articles):
         if not config.db.has_posted_article(article.link):
             # After posting, record the article as posted
             article.post_to_bluesky()
             config.db.record_posted_article(article.link)
-            time.sleep(config.get_delay_between_posts_seconds())
-    
+
+            if i < len(articles) - 1:
+                delay = config.get_delay_between_posts_seconds()
+                config.logger.info(f"Waiting {delay} seconds before next post..")
+                time.sleep(delay)
 
 if __name__ == "__main__":
     main()
