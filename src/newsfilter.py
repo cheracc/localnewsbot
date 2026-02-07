@@ -29,7 +29,7 @@ class NewsFilter:
         to_remove = previously_excluded + previously_posted
         working_articles = [art for art in articles if art not in to_remove]
         
-        self.logger.info(f"removed {len(previously_posted)} articles that were already posted and {len(previously_excluded)} articles that were previously excluded")
+        self.logger.debug(f"removed {len(previously_posted)} articles that were already posted and {len(previously_excluded)} articles that were previously excluded")
         
         # Apply headline, body, and URL filters, splitting them into filtered and removed articles
         # apply filters in sequence and accumulate removed articles without duplicating filtered lists
@@ -56,7 +56,7 @@ class NewsFilter:
 
         for article in removed_articles[:]:
             if any(phrase in article.headline for phrase in goodwords):
-                self.logger.info(f"Restoring due to ok phrase match: {article.headline}")
+                self.logger.debug(f"Restoring due to ok phrase match: {article.headline}")
                 working_articles.append(article)
                 removed_articles.remove(article)
 
@@ -67,6 +67,11 @@ class NewsFilter:
             self.data.record_excluded_article(article.link)
             
         self.logger.debug(f"Added {len(removed_articles)} articles to 'excluded' table in database")
+
+        self.logger.info("The following articles (headlines) were removed by filters:")
+        for article in removed_articles:
+            self.logger.info(f"{article.headline}")
+        
 
         return working_articles
     
