@@ -1,12 +1,17 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bsky_post import BskyPost
+    from src.config import Config
 
 # NewsFilter applies filtering rules to a list of PostableArticle objects, the last step before posting to Bluesky
 class NewsFilter:
-    def __init__(self, config):
+    def __init__(self, config: Config):
         self.data = config.db
         self.config = config
         self.logger = config.get_logger()
 
-    def filter(self, articles: list['BskyPost']) -> list['BskyPost']: # type: ignore
+    def filter(self, articles: list[BskyPost]) -> list[BskyPost]:
         self.filteredwords = self.config.get_bad_words()
         goodwords = self.config.get_good_words()
         previously_posted = []
@@ -66,7 +71,7 @@ class NewsFilter:
         return working_articles
     
     # Applies headline, body, and URL filters
-    def filter_headlines(self, articles: list['BskyPost']) -> tuple[list, list]: # type: ignore
+    def filter_headlines(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]: 
         filtered_articles = []
         removed_articles = []
         for article in articles:
@@ -77,7 +82,7 @@ class NewsFilter:
                 self.logger.info(f"Excluding due to headline filter: {article.headline}")
         return filtered_articles, removed_articles
     
-    def filter_body(self, articles: list['BskyPost']) -> tuple[list, list]: # type: ignore
+    def filter_body(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]:
         filtered_articles = []
         removed_articles = []
         for article in articles:
@@ -88,7 +93,7 @@ class NewsFilter:
                 self.logger.info(f"Excluding due to body filter: {article.headline}")
         return filtered_articles, removed_articles
     
-    def filter_url(self, articles: list['BskyPost']) -> tuple[list, list]: # type: ignore
+    def filter_url(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]:
         filtered_articles = []
         removed_articles = []
         for article in articles:

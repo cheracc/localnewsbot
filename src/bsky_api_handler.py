@@ -4,19 +4,22 @@ this file was ripped directly from bluesky's official examples. some modificatio
 Script demonstrating how to create posts using the Bluesky API, covering most of the features and embed options.
 To run this Python script, you need the 'requests' and 'bs4' (BeautifulSoup) packages installed.
 """
+from __future__ import annotations
 import re
 import logging
 import requests
-from typing import Dict, List
+from typing import Dict, List, Any, TYPE_CHECKING
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
-from src.rsssource import BskyPost
+from src.bsky_post import BskyPost
+if TYPE_CHECKING:
+    from src.bsky_account import BskyAccount
 
 class BskyApiHandler:
     def __init__(self, logger: logging.Logger):
         self.logger = logger
 
-    def parse_hashtags(self, text: str) -> List[Dict]:
+    def parse_hashtags(self, text: str) -> List[Dict[str, Any]]:
         spans = []
         hashtag_regex = rb"[$|\W](#([a-zA-Z0-9_]{1,30}))"
         text_bytes = text.encode("UTF-8")
@@ -31,7 +34,7 @@ class BskyApiHandler:
             )
         return spans
 
-    def parse_mentions(self, text: str) -> List[Dict]:
+    def parse_mentions(self, text: str) -> List[Dict[str, Any]]:
         spans = []
         # regex based on: https://atproto.com/specs/handle#handle-identifier-syntax
         mention_regex = rb"[$|\W](@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)"
@@ -46,7 +49,7 @@ class BskyApiHandler:
             )
         return spans
 
-    def parse_urls(self, text: str) -> List[Dict]:
+    def parse_urls(self, text: str) -> List[Dict[str, Any]]:
         spans = []
         # partial/naive URL regex based on: https://stackoverflow.com/a/3809435
         # tweaked to disallow some training punctuation
@@ -62,7 +65,7 @@ class BskyApiHandler:
             )
         return spans
 
-    def parse_facets(self, pds_url: str, text: str) -> List[Dict]:
+    def parse_facets(self, pds_url: str, text: str) -> List[Dict[str, Any]]:
         """
         parses post text and returns a list of app.bsky.richtext.facet objects for any mentions (@handle.example.com) or URLs (https://example.com)
 
@@ -121,7 +124,7 @@ class BskyApiHandler:
             )
         return facets
 
-    def parse_uri(self, uri: str) -> Dict:
+    def parse_uri(self, uri: str) -> Dict[str, Any]:
         if uri.startswith("at://"):
             repo, collection, rkey = uri.split("/")[2:5]
             return {"repo": repo, "collection": collection, "rkey": rkey}
@@ -137,7 +140,7 @@ class BskyApiHandler:
         else:
             raise Exception("unhandled URI format: " + uri)
 
-    def get_reply_refs(self, pds_url: str, parent_uri: str) -> Dict:
+    def get_reply_refs(self, pds_url: str, parent_uri: str) -> Dict[str, Any]:
         uri_parts = self.parse_uri(parent_uri)
         resp = requests.get(
             pds_url + "/xrpc/com.atproto.repo.getRecord",
@@ -196,7 +199,7 @@ class BskyApiHandler:
 
     def upload_images(
         self, pds_url: str, access_token: str, image_paths: List[str], alt_text: str
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         images = []
         for ip in image_paths:
             with open(ip, "rb") as f:
@@ -213,7 +216,7 @@ class BskyApiHandler:
             "images": images,
         }
 
-    def fetch_embed_url_card(self, pds_url: str, access_token: str, bsky_post: BskyPost) -> Dict:
+    def fetch_embed_url_card(self, pds_url: str, access_token: str, bsky_post: BskyPost) -> Dict[str, Any]:
         # the required fields for an embed card
         card = {
             "uri": bsky_post.link,
@@ -272,7 +275,7 @@ class BskyApiHandler:
             "external": card,
         }
 
-    def get_embed_ref(self, pds_url: str, ref_uri: str) -> Dict:
+    def get_embed_ref(self, pds_url: str, ref_uri: str) -> Dict[str, Any]:
         uri_parts = self.parse_uri(ref_uri)
         resp = requests.get(
             pds_url + "/xrpc/com.atproto.repo.getRecord",
@@ -290,19 +293,15 @@ class BskyApiHandler:
             },
         }
 
-    def create_post(self, bsky_account, bsky_post: BskyPost):
-        from src.bsky_account import BskyAccount
-        if not isinstance(bsky_account, BskyAccount):
-            raise ValueError("bsky_post must be an instance of BskyPost")
-
-        args = bsky_post.get_post_args(bsky_account)
+    def create_post(self, bsky_account: BskyAccount, bsky_post: BskyPost) -> None:
+        args = bsky_post.get_post_args()
         session = bsky_account.get_session()
 
         # trailing "Z" is preferred over "+00:00"
         now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         # these are the required fields which every post must include
-        post = {
+        post: Dict[str, Any] = {
             "$type": "app.bsky.feed.post",
             "text": args["text"],
             "createdAt": now,
@@ -321,7 +320,7 @@ class BskyApiHandler:
 
         if args.get("image"):
             post["embed"] = self.upload_images(
-                args["pds_url"], session["accessJwt"], args["image"], args["alt_text"]
+                args["pds_url"], session["accessJwt"], [args["image"]], args["alt_text"]
             )
 
         elif args.get("embed_ref"):
@@ -351,4 +350,3 @@ class BskyApiHandler:
                 self.logger.debug(resp.text)
             except Exception:
                 pass
-

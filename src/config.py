@@ -1,9 +1,10 @@
 import datetime
 import os
 import sys
+from src.aisummary import Summarizer
 from src.data import DatabaseManager
 from src.bsky_account import BskyAccount
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from src.newsfilter import NewsFilter
 import yaml
 import logging
@@ -17,7 +18,11 @@ class Config:
         self.bsky_account = None
         self.db = DatabaseManager()
         self.news_filter = NewsFilter(self)
+        self.summarizer = Summarizer(self)
 
+    def get_summarizer(self) -> Summarizer:
+        return self.summarizer
+    
     def load_configs(self) -> None:
         self.__main_config = self.read_config("config/config.yml")
         self.__feed_config = self.read_config("config/feeds.yml")
@@ -106,7 +111,7 @@ class Config:
                 raise ValueError("max_article_age_days in config must be an integer")
         return 10
     
-    def get_tags(self) -> Dict[str, str]:
+    def get_tags(self) -> Dict[str, list[str]]:
         return self.__tags_config
     
     def get_gemini_api_key(self) -> str:
@@ -122,7 +127,7 @@ class Config:
         with open(path, "w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
 
-    def get_saved_session(self) -> Dict:
+    def get_saved_session(self) -> Dict[str, Any]:
         return self.__session if self.__session else {}
     
     def get_pds_url(self) -> str:

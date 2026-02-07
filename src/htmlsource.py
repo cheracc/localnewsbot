@@ -2,15 +2,17 @@ import datetime
 import logging
 import newspaper
 from src.config import Config
-from src.bskypost import BskyPost
+from src.bsky_post import BskyPost
+from src.aisummary import Summarizer
 from newspaper import Article as HTMLArticle
 
 # WebNewsSource handles parsing news articles from HTML sources using the newspaper3k library
 class WebNewsSource:
-    def __init__(self, name: str, url: str, tag: str):
+    def __init__(self, name: str, url: str, tag: str, config: Config):
         self._name = name
         self._url = url
         self._tag = tag
+        self.config = config
 
     def get_articles(self) -> list[BskyPost]:
         return self.parse_website()
@@ -35,7 +37,8 @@ class WebNewsSource:
                 link=article.url.split('?')[0].split('#')[0],  # Remove query parameters and fragment identifiers for consistency
                 img_url=article.top_image,
                 created_at=article.publish_date.strftime('%a, %d %b %Y %H:%M:%S %z') if isinstance(article.publish_date, datetime.datetime) else datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z'),
-                tag=self._tag
+                tag=self._tag,
+                config=self.config,
             )
             articles.append(extracted_article)
         return articles
@@ -45,7 +48,7 @@ def get_html_sources(config: Config) -> list[BskyPost]:
     sources = []
     html_sources = config.get_html_sources()
     for _, source_info in html_sources.items():
-        sources.append(WebNewsSource(source_info["name"], source_info["url"], source_info["tag"]))
+        sources.append(WebNewsSource(source_info["name"], source_info["url"], source_info["tag"], config))
 
     articles = []
 

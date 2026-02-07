@@ -1,35 +1,41 @@
 # Definition of BskyPost class - represents an article to be posted
+from __future__ import annotations
 import html
 import re
-from src.aisummary import Summarizer
-from typing import Any, Dict
 import src.tags as tags
+from src.aisummary import Summarizer
+from typing import Any, Dict, TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.config import Config
+
 
 class BskyPost:
-    def __init__(self, source_name, headline, description, link, img_url, tag, created_at):
+    def __init__(self, source_name: str, headline: str, description: str, link: str, img_url: str, tag: str, created_at: str, config: Config):
         self.source_name = source_name
         self.headline = headline
         self.description = description
-        self.formatted_text = None
         self.link = link
         self.img_url = img_url
         self.tag = tag
         self.created_at = created_at
         self.post_text = None
+        self.config = config
 
-    def get_post_text(self, bsky_account: 'BskyAccount') -> str: # type: ignore
-        if self.formatted_text is None:
-            self.formatted_text = self.get_ai_summary(bsky_account)
-            if not self.formatted_text:
-                self.formatted_text = self.format_post_text()
-        return self.add_tags_to_post(bsky_account.config.get_tags())
+    # gets the text of the post as it will be seen on Bluesky, including tags
+    def get_post_text(self) -> str: 
+        if not self.post_text:
+            self.post_text = self.get_ai_summary()
+        if not self.post_text:
+            self.post_text = self.format_post_text()
+        return self.post_text
 
-    def add_tags_to_post(self, tags_config: Dict[str, Any]) -> str:
-        return tags.add_tags_to_post(self, tags_config)
+    def add_tags_to_post(self) -> str:
+        return tags.add_tags_to_post(self, self.config.get_tags())
 
-    def post_to_bluesky(self, bsky_account: 'BskyAccount') -> None: # type: ignore
-        self.post_text = self.get_post_text(bsky_account)
-        bsky_account.post_article(self)
+    def post_to_bluesky(self) -> None: 
+        self.post_text = self.get_post_text()
+        self.post_text = self.add_tags_to_post()
+        self.config.get_bsky_account().post_article(self)
 
     def format_post_text(self) -> str:
         text = f"{self.headline}\n\n{self.description}"
@@ -58,15 +64,15 @@ class BskyPost:
 
         return text
     
-    def get_post_args(self, bsky_account: 'BskyAccount') -> dict: # type: ignore
+    def get_post_args(self) -> dict[str, str]:
         return {
             "pds_url": "https://bsky.social",
-            "handle": bsky_account.config.handle,
-            "password": bsky_account.config.password,
+            "handle": self.config.get_bsky_account().handle,
+            "password": self.config.get_bsky_account().password,
             "embed_url": self.link,
-            "text": self.post_text
+            "text": self.post_text if self.post_text else self.format_post_text(),
         }
     
-    def get_ai_summary(self, bsky_account: 'BskyAccount') -> str: # type: ignore
-        ai = Summarizer(bsky_account.config)
-        return ai.summarize(self.link)
+    def get_ai_summary(self) -> str:
+
+        return self.config.get_summarizer().summarize(self.link)

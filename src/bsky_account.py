@@ -1,20 +1,21 @@
+from __future__ import annotations
 import sys
-from typing import Dict
+from typing import Any, Dict
 import requests
 import urllib3
 import json
 
-from src.bskypost import BskyPost
 from src.bsky_api_handler import BskyApiHandler
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.config import Config
+    from src.bsky_post import BskyPost
 
 # BskyAccount handles authentication and posting to Bluesky
 class BskyAccount():
     
-    def __init__(self, config: 'Config'): # type: ignore
+    def __init__(self, config: Config):
         self.config = config
-        from src.config import Config
-        if not isinstance(config, Config):
-            raise ValueError("config must be an instance of Config")
         self.bsky_api_handler = BskyApiHandler(self.config.get_logger())
         self.pds_url = self.config.get_pds_url()
         self.handle = self.config.handle
@@ -26,7 +27,7 @@ class BskyAccount():
     def post_article(self, article: BskyPost) -> None:
         self.bsky_api_handler.create_post(self, article)
 
-    def get_session(self) -> Dict:
+    def get_session(self) -> Dict[str, Any]:
         # First check if we already have a session token
         if self.session and self.session["refreshJwt"]:
             # We do, refresh it first then return it

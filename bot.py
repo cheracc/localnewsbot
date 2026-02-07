@@ -3,7 +3,7 @@ import socket
 import time
 import src.htmlsource
 import src.rsssource
-from src.bskypost import BskyPost
+from src.bsky_post import BskyPost
 from src.config import Config
 
 # Main function
@@ -42,7 +42,7 @@ def post_all_articles(articles: list[BskyPost], config: Config):
             config.logger.info(f"Posting article: {article.headline}")
         
             # After posting, record the article as posted
-            article.post_to_bluesky(bsky_account)
+            article.post_to_bluesky()
             config.db.record_posted_article(article.link)
             time.sleep(2)
     

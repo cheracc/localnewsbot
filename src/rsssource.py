@@ -1,19 +1,22 @@
+from __future__ import annotations
 import feedparser
 import datetime
 import logging
 
-from src.bskypost import BskyPost
+from src.bsky_post import BskyPost
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from src.config import Config
+    from feedparser import FeedParserDict
 
 # RSS_Source handles parsing news articles from RSS feeds
 class RSS_Source():
-    def __init__(self, name: str, url: str, tag: str, config):
-        from src.config import Config
-        if not isinstance(config, Config):
-            raise ValueError("config must be an instance of Config")
+    def __init__(self, name: str, url: str, tag: str, config: Config):
         self._name = name
         self._url = url
         self._tag = tag
         self._db = config.db
+        self._config = config
 
     def get_articles(self, max_age: int) -> list[BskyPost]:
         return self.parse_rss(max_age)
@@ -25,8 +28,15 @@ class RSS_Source():
             logging.exception(f"Failed to parse RSS feed {self._name}")
             return []
 
-        articles = []
+        articles: list[BskyPost] = []
+        if not feed.entries or not isinstance(feed.entries, list):
+            return []
+        
+        from feedparser import FeedParserDict
         for entry in feed.entries:
+            if not entry or not isinstance(entry, FeedParserDict):
+                continue
+
             link = str(entry.link)
             if self._db.has_posted_article(link) or self._db.is_excluded(link):
                 continue
@@ -58,18 +68,19 @@ class RSS_Source():
 
             article = BskyPost(
                 source_name=self._name,
-                headline=entry.title,
-                description=entry.description,
-                link=entry.link,
-                img_url=img_url,
-                created_at=entry.published,
-                tag=self._tag
+                headline=str(entry.title),
+                description=str(entry.description),
+                link=str(entry.link),
+                img_url=str(img_url),
+                created_at=str(entry.published) if entry.published else datetime.datetime.now().isoformat(),
+                tag=self._tag,
+                config = self._config
             )
             articles.append(article)
         return articles
     
 # Parse RSS feeds from config and return list of PostableArticle
-def get_rss_feeds(config: 'Config') -> list[BskyPost]: # type: ignore
+def get_rss_feeds(config: Config) -> list[BskyPost]: # type: ignore
     # from src.config import Config # This import is not needed here due to the type hint 'Config'
 
     feeds = []
