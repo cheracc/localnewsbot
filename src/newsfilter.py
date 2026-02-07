@@ -55,6 +55,7 @@ class NewsFilter:
                 working_articles.append(article)
                 removed_articles.remove(article)
 
+        # put the 'ineligible for restore' articles back in the list so they can be logged to db as 'excluded'
         removed_articles.extend(super_removed_articles)
 
         for article in removed_articles:
