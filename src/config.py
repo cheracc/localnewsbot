@@ -133,7 +133,7 @@ class Config:
             self.__session = self.get_bsky_account().session
             self.save_config("config/session.yml", self.__session)
             # Save the updated config
-            self.logger.info("Bsky session saved to session.yml")
+            self.logger.debug("Bsky session saved to session.yml")
         
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")
