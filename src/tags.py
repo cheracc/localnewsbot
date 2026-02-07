@@ -3,7 +3,8 @@ from typing import Dict
 
 def _assign_tags_from_keywords(article: 'BskyPost', tags_config: Dict[str, list[str]]) -> list[str]: # type: ignore
     assigned_tags = []
-    article_text = f"{article.headline} {article.description}".lower()
+    article_text = f"{article.headline} {article.description} {article.link}".replace("\n", " ")
+    article_text = article_text.replace("-", " ").replace("_", " ").replace("/", " ").replace(".", " ").replace(",", " ").replace(":", " ").lower()
 
     for tag, keywords in tags_config.items():
         for keyword in keywords:
