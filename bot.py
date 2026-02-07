@@ -57,7 +57,7 @@ def post_all_articles(articles: list[BskyPost], config: Config):
             # After posting, record the article as posted
             article.post_to_bluesky()
             config.db.record_posted_article(article.link)
-            time.sleep(2)
+            time.sleep(config.get_delay_between_posts_seconds())
     
 
 if __name__ == "__main__":
