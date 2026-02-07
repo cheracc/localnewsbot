@@ -6,6 +6,7 @@ from src.data import DatabaseManager
 from src.bsky_account import BskyAccount
 from typing import Dict, Any
 from src.newsfilter import NewsFilter
+from src.bsky_chat_handler import BskyChatHandler
 import yaml
 import logging
 
@@ -19,6 +20,12 @@ class Config:
         self.db = DatabaseManager()
         self.news_filter = NewsFilter(self)
         self.summarizer = Summarizer(self)
+        self.chat_handler = None
+
+    def get_chat_handler(self) -> BskyChatHandler:
+        if not self.chat_handler:
+            self.chat_handler = BskyChatHandler(self)
+        return self.chat_handler
 
     def get_summarizer(self) -> Summarizer:
         return self.summarizer
@@ -33,6 +40,9 @@ class Config:
         except FileNotFoundError:
             self.__session = {}
 
+    def get_handle_password(self) -> tuple[str, str]:
+        return self.__main_config['bsky_handle'], self.__main_config['bsky_password']
+
     def init_bsky_account(self) -> BskyAccount:
         if 'bsky_handle' not in self.__main_config or 'bsky_password' not in self.__main_config:
             self.logger.error("config.yml must contain 'bsky_handle' and 'bsky_password' keys")
@@ -41,6 +51,9 @@ class Config:
         self.handle = self.__main_config['bsky_handle']
         self.password = self.__main_config['bsky_password']
         return BskyAccount(self)
+
+    def get_admin_handle(self) -> str:
+        return self.__main_config.get('admin_bsky_handle', "")
 
     def get_bsky_account(self) -> BskyAccount:
         if self.bsky_account is None:
@@ -143,7 +156,17 @@ class Config:
             self.save_config("config/session.yml", self.__session)
             # Save the updated config
             self.logger.debug("Bsky session saved to session.yml")
-        
+
+    def add_bad_word(self, word: str) -> None:
+        self.__filter_config["bad_words"].append(word)
+        self.save_config("config/filter.yml", self.__filter_config)     
+        self.logger.info(f"Added '{word}' to bad words filter.")
+
+    def add_good_word(self, word: str) -> None:
+        self.__filter_config["good_words"].append(word)
+        self.save_config("config/filter.yml", self.__filter_config)
+        self.logger.info(f"Added '{word}' to good words filter.")
+
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")
 

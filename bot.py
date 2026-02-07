@@ -13,6 +13,7 @@ def main():
     config = Config() # loads config files and sets up database and api
 
     try:
+        config.get_chat_handler().check_for_commands()
         fetch_filter_and_post(config)
     except Exception as e:
         config.logger.error(f"An error occurred: {e}")
