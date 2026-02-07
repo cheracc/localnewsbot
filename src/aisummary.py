@@ -1,15 +1,15 @@
 from google import genai
 
+# Summarizer uses google GenAI to summarize a news article
 class Summarizer:
-
-    def __init__(self, config):
+    def __init__(self, config: 'Config'): # type: ignore
         self.client = genai.Client(api_key=config.get_gemini_api_key())
         self.logger = config.get_logger()
         self.prompt = config.get_ai_summary_prompt()
         self.model = config.get_gemini_model()
         
 
-    def summarize(self, link_to_article) -> str:
+    def summarize(self, link_to_article: str) -> str:
         try:
             response = self.client.models.generate_content(
                 model=self.model,
