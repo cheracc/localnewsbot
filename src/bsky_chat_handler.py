@@ -10,16 +10,10 @@ class BskyChatHandler:
     def __init__(self, config: Config):
         self.config = config
         self.admin_did = None
-        self.client = config.client
+        self.client = config.get_bsky_account().client
         self.command_handler = CommandHandler(config)
-        user, paswd = self.config.get_handle_password()
 
-        try:
-            self.client.login(user, paswd)
-        except AtProtocolError as e:
-            self.config.logger.error(f"Could not login user {user}: {e}")
-            raise
-
+        self.config.get_bsky_account().login()
         self.dm_client = self.client.with_bsky_chat_proxy()
         self.dm = self.dm_client.chat.bsky.convo
 
@@ -44,7 +38,11 @@ class BskyChatHandler:
 
     def __get_admin_convo(self) -> models.ChatBskyConvoDefs.ConvoView:
         try:
-            convo = self.dm.get_convo_for_members(models.ChatBskyConvoGetConvoForMembers.Params(members=[self.__get_admin_did()]),).convo
+            admin_did = self.__get_admin_did()
+            self.config.logger.debug(f"Admin did: {admin_did}")
+            params = models.ChatBskyConvoGetConvoForMembers.Params(members=[admin_did])
+            self.config.logger.debug(f"{params}")
+            convo = self.dm.get_convo_for_members(params=params).convo
             return convo
         except AtProtocolError as e:
             self.config.logger.error(f"Error fetching conversations: {e}")

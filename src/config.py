@@ -18,17 +18,10 @@ class Config:
     def __init__(self):
         self.load_configs()
         self.logger = self.__create_logger()
-        self.bsky_account = None
+        self.__bsky_account = None
         self.db = DatabaseManager()
         self.news_filter = NewsFilter(self)
         self.summarizer = Summarizer(self)
-        self.client = Client()
-        self.chat_handler = None
-
-    def get_chat_handler(self) -> BskyChatHandler:
-        if not self.chat_handler:
-            self.chat_handler = BskyChatHandler(self)
-        return self.chat_handler
 
     def get_summarizer(self) -> Summarizer:
         return self.summarizer
@@ -59,9 +52,9 @@ class Config:
         return self.__main_config.get('admin_bsky_handle', "")
 
     def get_bsky_account(self) -> BskyAccount:
-        if self.bsky_account is None:
-            self.bsky_account = self.init_bsky_account()
-        return self.bsky_account
+        if self.__bsky_account is None:
+            self.__bsky_account = self.init_bsky_account()
+        return self.__bsky_account
 
     def get_logger(self) -> logging.Logger:
         return self.logger
