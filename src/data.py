@@ -130,3 +130,15 @@ class DatabaseManager:
             conn.commit()
         finally:
             conn.close()
+
+    def get_recently_excluded_articles(self, limit: int = 10) -> list[str]:
+        """Retrieve a list of recently excluded article URLs."""
+        conn = self._get_connection()
+        try:
+            cursor = conn.execute(
+                "SELECT article_url FROM excluded ORDER BY excluded_at DESC LIMIT ?",
+                (limit,)
+            )
+            return [row[0] for row in cursor.fetchall()]
+        finally:
+            conn.close()
