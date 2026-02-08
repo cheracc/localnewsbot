@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+import shlex
 from typing import TYPE_CHECKING, Callable
 if TYPE_CHECKING:
     from src.config import Config
@@ -20,7 +21,7 @@ class CommandHandler:
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
         self.config.logger.debug(f"Evaluating message text for command keywords: {text}")
-        split = text.split()
+        split = shlex.split(text)
         if not split:
             return None
         command = split[0].lower()
@@ -65,18 +66,18 @@ def help_command(config: Config, word: str) -> CommandResponse:
     return CommandResponse(True, reply.rstrip())
 
 # Example message: add_bad_word istanbul
-def add_bad_word_to_filter(config: Config, word: str) -> CommandResponse:
-    if not word:
+def add_bad_word_to_filter(config: Config, words: str) -> CommandResponse:
+    if not words:
         return CommandResponse(False, "Syntax: add_bad_word word1 word2 ...")
-    split = word.split(" ")
+    split = shlex.split(words)
     for s in split:
         config.add_bad_word(s)
     return CommandResponse(True, f"Added {len(split)} bad words")
 
-def add_good_word_to_filter(config: Config, word: str) -> CommandResponse:
-    if not word:
+def add_good_word_to_filter(config: Config, words: str) -> CommandResponse:
+    if not words:
         return CommandResponse(False, "Syntax: add_good_word word1 word2 ...")
-    split = word.split(" ")
+    split = shlex.split(words)
     for s in split:
         config.add_good_word(s)
     return CommandResponse(True, f"Added {len(split)} good words")
@@ -86,3 +87,4 @@ def list_keywords_for_tag(config: Config, tag: str) -> CommandResponse:
     if not keyword_string:
         return CommandResponse(False, f"I do not have any keywords for #{tag}")
     return CommandResponse(True, keyword_string)
+
