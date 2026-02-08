@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class BskyPostHandler:
     def __init__(self, config: Config):
         self.config = config
-        self.client = config.client
+        self.client = config.get_bsky_account().client
         self.logger = config.logger
 
     def parse_hashtags_new(self, post_text: str) -> list[models.AppBskyRichtextFacet.Main]:
@@ -87,6 +87,7 @@ class BskyPostHandler:
                 resp = requests.get(img_url)
                 resp.raise_for_status()
                 self.logger.debug(f"embed_card img: {resp.content}")
+                self.client.login()
                 card.thumb = self.client.upload_blob(resp.content).blob
             except Exception as e:
                 self.logger.warning(f"Could not fetch image for embed card: {bsky_post.img_url},{e}")
@@ -102,6 +103,7 @@ class BskyPostHandler:
         facets = self.parse_facets_new(text)
     
         try:
+            self.config.get_bsky_account().login()
             response = self.client.send_post(text = text,
                                             profile_identify = profile_identity,
                                             embed = embed,

@@ -1,10 +1,13 @@
 from __future__ import annotations
 import sys
 from typing import Any, Dict
+from atproto import Client
+from atproto.exceptions import AtProtocolError
 import requests
 import urllib3
 import json
 
+from .bsky_chat_handler import BskyChatHandler
 from .bsky_post_handler import BskyPostHandler
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -15,17 +18,43 @@ if TYPE_CHECKING:
 class BskyAccount():
     
     def __init__(self, config: Config):
+        self.__chat_handler = None
+        self.__post_handler = None
         self.config = config
-        self.bsky_post_handler = BskyPostHandler(self.config)
+        self.client = Client()
         self.pds_url = self.config.get_pds_url()
         self.handle = self.config.handle
         self.password = self.config.password
         self.did = self.__get_did()
         self.apiKey = self.__get_api_key()
-        self.session = {}
+        self.session_string = ""
+
+
+    def login(self) -> None:
+        if self.session_string:
+            return
+
+        user, paswd = self.config.get_handle_password()
+        try:
+            self.client.login(user, paswd)
+            self.config.logger.debug(f"Logged in {user} (session: {self.client.export_session_string()})")
+            self.session_string = self.client.export_session_string()
+        except AtProtocolError as e:
+            self.config.logger.error(f"Could not login user {user}: {e}")
+            raise
+
+    def get_post_handler(self) -> BskyPostHandler:
+        if not self.__post_handler:
+            self.__post_handler = BskyPostHandler(self.config)
+        return self.__post_handler
+
+    def get_chat_handler(self) -> BskyChatHandler:
+        if not self.__chat_handler:
+            self.__chat_handler = BskyChatHandler(self.config)
+        return self.__chat_handler
 
     def post_article(self, article: BskyPost) -> None:
-        self.bsky_post_handler.create_post_new(article)
+        self.get_post_handler().create_post_new(article)
 
     def get_session_string(self) -> str:
         return self.get_session()["accessJwt"]
