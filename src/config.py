@@ -84,6 +84,22 @@ class Config:
             raise ValueError("html_sources in config must be a mapping")
         return sources
     
+    # Returns the default image URL for a given feed source name
+    def get_default_image_for_source(self, source_name: str) -> str:
+        # Check RSS feeds
+        rss_feeds = self.get_rss_feeds()
+        for feed_key, feed_data in rss_feeds.items():
+            if feed_data.get('name') == source_name:
+                return feed_data.get('defaultimage', '')
+        
+        # Check HTML sources
+        html_sources = self.get_html_sources()
+        for source_key, source_data in html_sources.items():
+            if source_data.get('name') == source_name:
+                return source_data.get('defaultimage', '')
+        
+        return ''
+    
     # Returns the list of bad words from config
     def get_bad_words(self) -> list[str]:
         bad_words = self.__filter_config.get("bad_words", []) or []

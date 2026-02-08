@@ -91,8 +91,52 @@ class BskyPostHandler:
                 self.logger.warning(f"Could not fetch image for embed card: {bsky_post.img_url},{e}")
                 card.thumb = None
 
+        if not card.thumb:
+            img_url = self.get_img_url_from_open_graph(bsky_post=bsky_post)
+            if img_url and len(img_url) > 0:
+                try:
+                    self.logger.debug(f"Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url}")
+                    resp = requests.get(img_url)
+                    resp.raise_for_status()
+                    self.config.get_bsky_account().login()
+                    card.thumb = self.client.upload_blob(resp.content).blob
+                except Exception as e:
+                    self.logger.warning(f"Could not fetch Open Graph image for embed card: {bsky_post.link},{e}")
+                    card.thumb = None
+
+        # Try default image from feeds.yml as final fallback
+        if not card.thumb:
+            default_img_url = self.config.get_default_image_for_source(bsky_post.source_name)
+            if default_img_url and len(default_img_url) > 0:
+                try:
+                    self.logger.debug(f"Attempting to get imageblob from default image for {bsky_post.source_name} using {default_img_url}")
+                    resp = requests.get(default_img_url)
+                    resp.raise_for_status()
+                    self.config.get_bsky_account().login()
+                    card.thumb = self.client.upload_blob(resp.content).blob
+                except Exception as e:
+                    self.logger.warning(f"Could not fetch default image for embed card: {bsky_post.source_name},{e}")
+                    card.thumb = None
+
         return models.AppBskyEmbedExternal.Main(external = card)
 
+    def get_img_url_from_open_graph(self, bsky_post: BskyPost) -> str:
+        try:
+            resp = requests.get(bsky_post.link, timeout=5)
+            resp.raise_for_status()
+            og_image_regex = r'<meta property="og:image" content="([^"]+)"'
+            match = re.search(og_image_regex, resp.text)
+            if match:
+                img_url = match.group(1)
+                self.logger.debug(f"Found og:image for {bsky_post.link}: {img_url}")
+                return img_url
+            else:
+                self.logger.debug(f"No og:image found for {bsky_post.link}")
+                return ""
+        except Exception as e:
+            self.logger.warning(f"Error fetching Open Graph data for {bsky_post.link}: {e}")
+            return ""
+    
     def create_post_new(self, bsky_post: BskyPost) -> bool:
         text = bsky_post.get_post_text()
         profile_identity = self.config.get_bsky_account().handle
@@ -111,5 +155,5 @@ class BskyPostHandler:
             return True
         except AtProtocolError as e:
                 self.logger.error(f"Error creating post: {e}")
-                raise
+                return False
 
