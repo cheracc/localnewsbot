@@ -13,12 +13,16 @@ class CommandHandler:
         self.register_commands()
 
     def register_commands(self):
-        self.register_command(BotCommand(self.config, "help", help_command))
-        self.register_command(BotCommand(self.config, "add_bad_word", add_bad_word_to_filter))
-        self.register_command(BotCommand(self.config, "add_good_word", add_good_word_to_filter))
-        self.register_command(BotCommand(self.config, "list_tag_keywords", list_keywords_for_tag))
-        self.register_command(BotCommand(self.config, "list_bad_words", list_bad_words))
-        self.register_command(BotCommand(self.config, "list_good_words", list_good_words))
+        self.register_command(BotCommand(self.config, "/help", help_command))
+        self.register_command(BotCommand(self.config, "/addbadword", add_bad_word_to_filter))
+        self.register_command(BotCommand(self.config, "/addgoodword", add_good_word_to_filter))
+        self.register_command(BotCommand(self.config, "/listtagkeywords", list_keywords_for_tag))
+        self.register_command(BotCommand(self.config, "/listbadwords", list_bad_words))
+        self.register_command(BotCommand(self.config, "/listgoodwords", list_good_words))
+        self.register_command(BotCommand(self.config, "/removebadword", remove_bad_words))
+        self.register_command(BotCommand(self.config, "/removegoodword", remove_good_words))
+        self.register_command(BotCommand(self.config, "/addkeywordstotag", add_keywords_to_tag))
+        self.register_command(BotCommand(self.config, "/removekeywordsfromtag", remove_keywords_from_tag))
 
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
@@ -68,34 +72,70 @@ def help_command(config: Config, args: list[str]) -> CommandResponse:
     reply = reply + "\n\nType a command by itself for syntax hints."
     return CommandResponse(True, reply.rstrip())
 
-# Example message: add_bad_word istanbul
+# Example message: /addbadword istanbul
 def add_bad_word_to_filter(config: Config, args: list[str]) -> CommandResponse:
     if not args or len(args) == 0:
-        return CommandResponse(False, 'Syntax: add_bad_word word1 "word two" ...')
+        return CommandResponse(False, 'Syntax: /addbadword word1 "word two" ...')
     config.add_bad_words(args)
     return CommandResponse(True, f"Added {len(args)} bad words")
 
 def add_good_word_to_filter(config: Config, args: list[str]) -> CommandResponse:
     if not args:
-        return CommandResponse(False, 'Syntax: add_good_word word1 "word two" ...')
+        return CommandResponse(False, 'Syntax: /addgoodword word1 "word two" ...')
     config.add_good_words(args)
     return CommandResponse(True, f"Added {len(args)} good words")
 
 def list_keywords_for_tag(config: Config, args: list[str]) -> CommandResponse:
     if not args or len(args) != 1:
-        return CommandResponse(False, 'Syntax: list_tag_keywords tagNameWithoutHashtag')
+        return CommandResponse(False, 'Syntax: /listtagkeywords tagNameWithoutHashtag')
 
     keyword_string = config.get_tag_keywords(args[0])
     if not keyword_string:
         return CommandResponse(False, f"I do not have any keywords for #{args[0]}")
-    return CommandResponse(True, keyword_string)
+    return CommandResponse(True, f"#{args[0]} will be added if any of these words are found:\n\n{keyword_string}")
 
 def list_bad_words(config: Config, args: list[str]) -> CommandResponse:
     bad_words = "|".join(config.get_bad_words())
-    response = f"Here are all the bad words:\n\n{bad_words}"
+    response = f"Here are all the bad words:\n\n{bad_words}\n\nA bad word match is overridden if a good word is also present. Matching is case-insensitive."
     return CommandResponse(True, response)
 
 def list_good_words(config: Config, args: list[str]) -> CommandResponse:
     good_words = "|".join(config.get_good_words())
-    response = f"Here are all the good words:\n\n{good_words}"
+    response = f"Here are all the good words:\n\n{good_words}\n\nA good word match overrides bad words. Matching is case-insensitive."
     return CommandResponse(True, response)
+
+def remove_bad_words(config: Config, args: list[str]) -> CommandResponse:
+    removed = config.remove_bad_words(args)
+    if removed == 0:
+        return CommandResponse(False, "None of those words were found in the bad words list.")
+    else:
+        return CommandResponse(True, f"Removed {removed} bad words.")
+    
+def remove_good_words(config: Config, args: list[str]) -> CommandResponse:
+    removed = config.remove_good_words(args)
+    if removed == 0:
+        return CommandResponse(False, "None of those words were found in the good words list.")
+    else:
+        return CommandResponse(True, f"Removed {removed} good words.")
+
+def remove_keywords_from_tag(config: Config, args: list[str]) -> CommandResponse:
+    if not args or len(args) < 2:
+        return CommandResponse(False, 'Syntax: /removekeywordsfromtag tagNameWithoutHashtag keyword1 "keyword two" ...')
+
+    tag = args[0]
+    keywords = args[1:]
+    removed_count = config.remove_keywords_from_tag(tag, keywords)
+    if removed_count == 0:
+        return CommandResponse(False, f"None of those keywords were found for #{tag}")
+    else:
+        return CommandResponse(True, f"Removed {removed_count} keywords from #{tag}")
+    
+def add_keywords_to_tag(config: Config, args: list[str]) -> CommandResponse:
+    if not args or len(args) < 2:
+        return CommandResponse(False, 'Syntax: /addkeywordstotag tagNameWithoutHashtag keyword1 "keyword two" ...')
+
+    tag = args[0]
+    keywords = args[1:]
+    if config.add_keywords_to_tag(tag, keywords):
+        return CommandResponse(True, f"Created new tag #{tag} and added {len(keywords)} keywords to it.")
+    return CommandResponse(True, f"Added {len(keywords)} keywords to existing tag #{tag}")

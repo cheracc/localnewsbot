@@ -14,7 +14,9 @@ def main():
 
     try:
         config.get_bsky_account().get_chat_handler().check_for_commands()
-        fetch_filter_and_post(config)
+        if "--no-posts" not in __import__('sys').argv:
+            fetch_filter_and_post(config)
+        config.save_session()
     except Exception as e:
         config.logger.error(f"An error occurred: {e}")
         raise

@@ -27,7 +27,7 @@ class Config:
     def load_configs(self) -> None:
         self.__main_config = self.read_config("config/config.yml")
         self.__feed_config = self.read_config("config/feeds.yml")
-        self.__filter_config = self.read_config("config/filter.yml")
+        self.__filter_config: dict[str, list[str]] = self.read_config("config/filter.yml")
         self.__tags_config = self.read_config("config/tags.yml")
         try:
             self.__session = self.read_config("config/session.yml")
@@ -121,6 +121,16 @@ class Config:
     def get_tags(self) -> Dict[str, list[str]]:
         return self.__tags_config
     
+    def get_tag_keywords(self, tag: str) -> str:
+        if not self.get_tags().get(tag):
+            return ""
+        kwds = self.get_tags()[tag]
+        if kwds:
+            kwd_string = "|".join(kwds)
+            return kwd_string
+        else:
+            return ""
+
     def get_gemini_api_key(self) -> str:
         return self.__main_config.get("gemini_api_key", "")
     
@@ -138,18 +148,16 @@ class Config:
         with open(path, "w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
 
-    def get_saved_session(self) -> Dict[str, Any]:
-        return self.__session if self.__session else {}
+    def get_saved_session(self) -> str:
+        return self.__session["session_string"] if self.__session else ""
     
     def get_pds_url(self) -> str:
         return self.__main_config.get("pds_url", "https://bsky.social")
 
     def save_session(self) -> None:
-        if self.get_bsky_account().session:
-            self.__session = self.get_bsky_account().session
-            self.save_config("config/session.yml", self.__session)
-            # Save the updated config
-            self.logger.debug("Bsky session saved to session.yml")
+        session_string = self.get_bsky_account().session_string
+        self.__session = {"session_string": session_string}
+        self.save_config("config/session.yml", self.__session)
 
     def add_bad_words(self, words: list[str]) -> None:
         for word in words:
@@ -161,6 +169,66 @@ class Config:
             self.__add_good_word(word)
         self.save_config("config/filter.yml", self.__filter_config)
 
+    def remove_bad_words(self, words: list[str]) -> int:
+        found = 0
+        for word in words:
+            if self.__remove_bad_word(word):
+                found += 1
+        self.save_config("config/filter.yml", self.__filter_config) 
+        return found
+
+    def remove_good_words(self, words: list[str]) -> int:
+        found = 0
+        for word in words:
+            if self.__remove_good_word(word):
+                found += 1
+        self.save_config("config/filter.yml", self.__filter_config) 
+        return found
+    
+    def add_keywords_to_tag(self, tag: str, keywords: list[str]) -> bool:
+        created = False
+        for kw in keywords:
+            if self.__add_keyword_to_tag(tag, kw):
+                created = True
+        self.save_config("config/tags.yml", self.__tags_config)
+        return created
+    
+    def remove_keywords_from_tag(self, tag: str, keywords: list[str]) -> int:   
+        found = 0
+        for kw in keywords:
+            if self.__remove_keyword_from_tag(tag, kw):
+                found += 1
+        self.save_config("config/tags.yml", self.__tags_config)
+        return found
+    
+    def __add_keyword_to_tag(self, tag: str, keyword: str) -> bool:
+        created = False
+        if tag not in self.__tags_config:
+            self.__tags_config[tag] = []
+            created = True
+        self.__tags_config[tag].append(keyword)
+        return created
+    
+    def __remove_keyword_from_tag(self, tag: str, keyword: str) -> bool:
+        if tag not in self.__tags_config:
+            return False
+        keywords = [kw for kw in self.__tags_config[tag] if kw.lower() != keyword.lower()]
+        orig_len = len(self.__tags_config[tag])
+        self.__tags_config[tag] = keywords
+        return orig_len > len(keywords)
+
+    def __remove_bad_word(self, word: str) -> bool:
+        badwords = [bw for bw in self.__filter_config["bad_words"] if bw.lower() != word.lower()]
+        orig_len = len(self.__filter_config["bad_words"])
+        self.__filter_config["bad_words"] = badwords
+        return orig_len > len(badwords)
+    
+    def __remove_good_word(self, word: str) -> bool:
+        goodwords = [gw for gw in self.__filter_config["good_words"] if gw.lower() != word.lower()]
+        orig_len = len(self.__filter_config["good_words"])
+        self.__filter_config["good_words"] = goodwords
+        return orig_len > len(goodwords)
+
     def __add_bad_word(self, word: str) -> None:
         self.__filter_config["bad_words"].append(word)
         self.logger.info(f"Added '{word}' to bad words filter.")
@@ -168,16 +236,6 @@ class Config:
     def __add_good_word(self, word: str) -> None:
         self.__filter_config["good_words"].append(word)
         self.logger.info(f"Added '{word}' to good words filter.")
-
-    def get_tag_keywords(self, tag: str) -> str:
-        if not self.get_tags().get(tag):
-            return ""
-        kwds = self.get_tags()[tag]
-        if kwds:
-            kwd_string = "|".join(kwds)
-            return kwd_string
-        else:
-            return ""
 
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")
