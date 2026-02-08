@@ -86,7 +86,7 @@ class BskyPostHandler:
                 self.logger.debug(f"Attempting to get imageblob for {img_url}")
                 resp = requests.get(img_url)
                 resp.raise_for_status()
-                self.client.login()
+                self.config.get_bsky_account().login()
                 card.thumb = self.client.upload_blob(resp.content).blob
             except Exception as e:
                 self.logger.warning(f"Could not fetch image for embed card: {bsky_post.img_url},{e}")
