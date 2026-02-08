@@ -2,13 +2,11 @@ import datetime
 import os
 import sys
 
-from atproto import Client
 from src.aisummary import Summarizer
 from src.data import DatabaseManager
 from src.bsky_account import BskyAccount
 from typing import Dict, Any
 from src.newsfilter import NewsFilter
-from src.bsky_chat_handler import BskyChatHandler
 import yaml
 import logging
 
@@ -162,6 +160,16 @@ class Config:
         self.__filter_config["good_words"].append(word)
         self.save_config("config/filter.yml", self.__filter_config)
         self.logger.info(f"Added '{word}' to good words filter.")
+
+    def get_tag_keywords(self, tag: str) -> str:
+        if not self.get_tags().get(tag):
+            return ""
+        kwds = self.get_tags()[tag]
+        if kwds:
+            kwd_string = "|".join(kwds)
+            return kwd_string
+        else:
+            return ""
 
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")
