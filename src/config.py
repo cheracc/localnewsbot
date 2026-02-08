@@ -151,14 +151,22 @@ class Config:
             # Save the updated config
             self.logger.debug("Bsky session saved to session.yml")
 
-    def add_bad_word(self, word: str) -> None:
-        self.__filter_config["bad_words"].append(word)
+    def add_bad_words(self, words: list[str]) -> None:
+        for word in words:
+            self.__add_bad_word(word)
         self.save_config("config/filter.yml", self.__filter_config)     
+
+    def add_good_words(self, words: list[str]) -> None:
+        for word in words:
+            self.__add_good_word(word)
+        self.save_config("config/filter.yml", self.__filter_config)
+
+    def __add_bad_word(self, word: str) -> None:
+        self.__filter_config["bad_words"].append(word)
         self.logger.info(f"Added '{word}' to bad words filter.")
 
-    def add_good_word(self, word: str) -> None:
+    def __add_good_word(self, word: str) -> None:
         self.__filter_config["good_words"].append(word)
-        self.save_config("config/filter.yml", self.__filter_config)
         self.logger.info(f"Added '{word}' to good words filter.")
 
     def get_tag_keywords(self, tag: str) -> str:

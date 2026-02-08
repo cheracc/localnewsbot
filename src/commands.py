@@ -17,6 +17,8 @@ class CommandHandler:
         self.register_command(BotCommand(self.config, "add_bad_word", add_bad_word_to_filter))
         self.register_command(BotCommand(self.config, "add_good_word", add_good_word_to_filter))
         self.register_command(BotCommand(self.config, "list_tag_keywords", list_keywords_for_tag))
+        self.register_command(BotCommand(self.config, "list_bad_words", list_bad_words))
+        self.register_command(BotCommand(self.config, "list_good_words", list_good_words))
 
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
@@ -70,15 +72,13 @@ def help_command(config: Config, args: list[str]) -> CommandResponse:
 def add_bad_word_to_filter(config: Config, args: list[str]) -> CommandResponse:
     if not args or len(args) == 0:
         return CommandResponse(False, 'Syntax: add_bad_word word1 "word two" ...')
-    for s in args:
-        config.add_bad_word(s)
+    config.add_bad_words(args)
     return CommandResponse(True, f"Added {len(args)} bad words")
 
 def add_good_word_to_filter(config: Config, args: list[str]) -> CommandResponse:
     if not args:
         return CommandResponse(False, 'Syntax: add_good_word word1 "word two" ...')
-    for s in args:
-        config.add_good_word(s)
+    config.add_good_words(args)
     return CommandResponse(True, f"Added {len(args)} good words")
 
 def list_keywords_for_tag(config: Config, args: list[str]) -> CommandResponse:
@@ -90,3 +90,10 @@ def list_keywords_for_tag(config: Config, args: list[str]) -> CommandResponse:
         return CommandResponse(False, f"I do not have any keywords for #{args[0]}")
     return CommandResponse(True, keyword_string)
 
+def list_bad_words(config: Config, args: list[str]) -> CommandResponse:
+    bad_words = config.get_bad_words()
+    return CommandResponse(True, "|".join(bad_words))
+
+def list_good_words(config: Config, args: list[str]) -> CommandResponse:
+    good_words = config.get_good_words()
+    return CommandResponse(True, "|".join(good_words))

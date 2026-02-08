@@ -72,13 +72,53 @@ class BskyChatHandler:
                             except AtProtocolError as e:
                                 self.config.logger.warning(f"Error marking completed command: {e}")
                         
-                        if response.response and len(response.response) > 0:
+                        if response.response and len(response.response) > 0 and len(response.response) < 999:
                             try:
                                 self.dm.send_message(models.ChatBskyConvoSendMessage.Data(
                                     convo_id=convo_id, 
                                     message=models.ChatBskyConvoDefs.MessageInput(text=response.response)))
                             except AtProtocolError as e:
                                 self.config.logger.error(f"Error replying to convo: {e}")
+                        # can only post 1000 grapheme messages, so this splits it if its longer:
+                        elif response.response and len(response.response) > 999:
+                            try:
+                                message_texts = split_pipe_string(response.response)
+                                msg_datas = []
+                                for msg_txt in message_texts:
+                                    message_data = models.ChatBskyConvoSendMessageBatch.BatchItem(
+                                        convo_id=convo_id,
+                                        message=models.ChatBskyConvoDefs.MessageInput(text=msg_txt)
+                                    )
+                                    msg_datas.append(message_data)
+                                self.dm.send_message_batch(models.ChatBskyConvoSendMessageBatch.Data(items=msg_datas))
+                            except AtProtocolError as e:
+                                self.config.logger.error(f"Error replying to convo: {e}")
 
+def split_pipe_string(s: str, max_len: int = 999) -> list[str]:
+    parts = s.split('|')
+    chunks = []
+    current = ""
+
+    for part in parts:
+        # If current is empty, try starting with this part
+        if not current:
+            if len(part) > max_len:
+                raise ValueError(f"Single segment exceeds max length: {part[:50]}...")
+            current = part
+        else:
+            # Try adding "|part" to the current chunk
+            candidate = current + "|" + part
+            if len(candidate) <= max_len:
+                current = candidate
+            else:
+                chunks.append(current)
+                if len(part) > max_len:
+                    raise ValueError(f"Single segment exceeds max length: {part[:50]}...")
+                current = part
+
+    if current:
+        chunks.append(current)
+
+    return chunks
 
             
