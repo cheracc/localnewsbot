@@ -62,7 +62,7 @@ class RSS_Source():
 
             img_url = ""
             if entry.get("enclosures") and len(entry.enclosures) > 0:
-                enc_url = entry.enclosures[0]
+                enc_url = entry.enclosures[0].href
                 if any(ext in str(enc_url).lower() for ext in ["jpg", "jpeg", "png", "gif"]):
                     img_url = enc_url
 
