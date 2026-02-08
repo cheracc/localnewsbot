@@ -5,7 +5,7 @@ import requests
 import urllib3
 import json
 
-from src.bsky_api_handler import BskyApiHandler
+from .bsky_post_handler import BskyPostHandler
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.config import Config
@@ -16,7 +16,7 @@ class BskyAccount():
     
     def __init__(self, config: Config):
         self.config = config
-        self.bsky_api_handler = BskyApiHandler(self.config.get_logger())
+        self.bsky_post_handler = BskyPostHandler(self.config)
         self.pds_url = self.config.get_pds_url()
         self.handle = self.config.handle
         self.password = self.config.password
@@ -25,7 +25,7 @@ class BskyAccount():
         self.session = {}
 
     def post_article(self, article: BskyPost) -> None:
-        self.bsky_api_handler.create_post(self, article)
+        self.bsky_post_handler.create_post_new(article)
 
     def get_session_string(self) -> str:
         return self.get_session()["accessJwt"]

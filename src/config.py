@@ -1,6 +1,8 @@
 import datetime
 import os
 import sys
+
+from atproto import Client
 from src.aisummary import Summarizer
 from src.data import DatabaseManager
 from src.bsky_account import BskyAccount
@@ -20,6 +22,7 @@ class Config:
         self.db = DatabaseManager()
         self.news_filter = NewsFilter(self)
         self.summarizer = Summarizer(self)
+        self.client = Client()
         self.chat_handler = None
 
     def get_chat_handler(self) -> BskyChatHandler:
