@@ -18,7 +18,7 @@ class BskyChatHandler:
         self.dm = self.dm_client.chat.bsky.convo
 
     def check_for_commands(self):
-        self.config.logger.debug("Checking chat messages for admin commands")
+        self.config.logger.info("Checking chat messages for admin commands")
         convo = self.__get_admin_convo()
         messages = self.__get_admin_messages(convo)
         self.__parse_messages(messages, convo.id)    
@@ -61,6 +61,8 @@ class BskyChatHandler:
     def __parse_messages(self, messages: models.ChatBskyConvoGetMessages.Response, convo_id: str) -> None:
         for message in messages.messages:
             if isinstance(message, models.ChatBskyConvoDefs.MessageView):
+                if (message.reactions and message.sender.did == self.admin_did) or message.sender.did == self.config.get_bsky_account().get_did():
+                    self.dm.delete_message_for_self(models.ChatBskyConvoDeleteMessageForSelf.Data(convo_id=convo_id, message_id=message.id))
                 if not message.reactions and message.sender.did == self.admin_did:
                     text = message.text
                     if (response := self.command_handler.parse_commands(text)):
@@ -69,6 +71,7 @@ class BskyChatHandler:
                             # react with a thumbs-up to show the command was successful
                             try:
                                 self.dm.add_reaction(models.ChatBskyConvoAddReaction.Data(convo_id=convo_id, message_id=message.id, value="👍"))
+                                self.dm.delete_message_for_self(models.ChatBskyConvoDeleteMessageForSelf.Data(convo_id=convo_id, message_id=message.id))
                             except AtProtocolError as e:
                                 self.config.logger.warning(f"Error marking completed command: {e}")
                         
@@ -93,6 +96,13 @@ class BskyChatHandler:
                                 self.dm.send_message_batch(models.ChatBskyConvoSendMessageBatch.Data(items=msg_datas))
                             except AtProtocolError as e:
                                 self.config.logger.error(f"Error replying to convo: {e}")
+                    else:
+                        # No command found, react with a question mark to indicate unrecognized command
+                        try:                            
+                            self.dm.add_reaction(models.ChatBskyConvoAddReaction.Data(convo_id=convo_id, message_id=message.id, value="❓"))
+                            self.dm.delete_message_for_self(models.ChatBskyConvoDeleteMessageForSelf.Data(convo_id=convo_id, message_id=message.id))
+                        except AtProtocolError as e:
+                            self.config.logger.warning(f"Error marking unrecognized command: {e}")
 
 def split_pipe_string(s: str, max_len: int = 999) -> list[str]:
     parts = s.split('|')
