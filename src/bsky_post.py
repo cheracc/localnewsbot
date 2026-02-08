@@ -27,7 +27,10 @@ class BskyPost:
         if not self.post_text:
             self.post_text = self.get_ai_summary()
         if not self.post_text:
-            self.config.logger.debug("Could not get AI summary, falling back to headline and description.")
+            if self.config.get_summarizer().is_enabled():
+                self.config.logger.debug("Could not get AI summary, falling back to headline and description.")
+            else:
+                self.config.logger.debug("AI summarization disabled, using headline and description.")
             self.post_text = self.format_post_text()
         return self.post_text
 
@@ -84,6 +87,9 @@ class BskyPost:
         }
     
     def get_ai_summary(self) -> str:
+        if not self.config.get_summarizer().is_enabled():
+            return ""
+        
         self.config.logger.info(f"  Generating AI summary for: {self.headline}")
         response = self.config.get_summarizer().summarize(self.link)
         return response
