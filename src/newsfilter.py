@@ -12,8 +12,8 @@ class NewsFilter:
         self.logger = config.get_logger()
 
     def filter(self, articles: list[BskyPost]) -> list[BskyPost]:
-        self.filteredwords = self.config.get_bad_words()
-        goodwords = self.config.get_good_words()
+        self.bad_words = self.config.get_bad_words()
+        good_words = self.config.get_good_words()
         previously_posted = []
 
         for art in articles:
@@ -55,7 +55,7 @@ class NewsFilter:
             pass
 
         for article in removed_articles[:]:
-            if any(phrase in article.headline for phrase in goodwords):
+            if any(phrase in article.headline for phrase in good_words):
                 self.logger.debug(f"Restoring due to ok phrase match: {article.headline}")
                 working_articles.append(article)
                 removed_articles.remove(article)
@@ -80,7 +80,7 @@ class NewsFilter:
         filtered_articles = []
         removed_articles = []
         for article in articles:
-            if not any(word in article.headline for word in self.filteredwords):
+            if not any(word.lower() in article.headline.lower() for word in self.bad_words):
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
@@ -91,7 +91,7 @@ class NewsFilter:
         filtered_articles = []
         removed_articles = []
         for article in articles:
-            if not any(word in article.description for word in self.filteredwords):
+            if not any(word.lower() in article.description.lower() for word in self.bad_words):
                 filtered_articles.append(article)
             else:
                 removed_articles.append(article)
@@ -104,7 +104,7 @@ class NewsFilter:
         for article in articles:
             cleaned_url = article.link.replace("/", " ").replace(".", " ").replace("-", " ")
             self.logger.debug(f"Cleaned URL for filtering: {cleaned_url}")
-            if not any(word in cleaned_url for word in self.filteredwords):
+            if not any(word.lower() in cleaned_url.lower() for word in self.bad_words):
                 filtered_articles.append(article)
                 self.logger.debug(f"URL passed filter: {article.link}")
             else:
