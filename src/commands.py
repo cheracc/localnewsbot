@@ -25,6 +25,8 @@ class CommandHandler:
         self.register_command(BotCommand(self.config, "/removekeywordsfromtag", remove_keywords_from_tag))
         self.register_command(BotCommand(self.config, "/showprompt", show_prompt))
         self.register_command(BotCommand(self.config, "/setprompt", set_prompt))
+        self.register_command(BotCommand(self.config, "/recentlyexcluded", recently_excluded))
+        
 
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
@@ -154,3 +156,10 @@ def set_prompt(config: Config, args: list[str]) -> CommandResponse:
     new_prompt = " ".join(args)
     config.save_new_prompt(new_prompt)
     return CommandResponse(True, "AI summary prompt updated.")
+
+def recently_excluded(config: Config, args: list[str]) -> CommandResponse:
+    excluded_articles = config.db.get_recently_excluded_articles()
+    if not excluded_articles:
+        return CommandResponse(True, "No recently excluded articles.")
+    response = "Recently excluded articles:\n\n" + "\n| ".join(excluded_articles)
+    return CommandResponse(True, response)
