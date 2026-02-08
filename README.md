@@ -1,94 +1,135 @@
-My bot can be found at [@hbgpalocalnews.bsky.social](https://bsky.app/profile/hbgpalocalnews.bsky.social)
-
 # LocalNewsBot 📰🤖
 
-`LocalNewsBot` is an automated tool designed to scrape local news headlines and articles from various sources and post them directly to **Bluesky**. It helps keep local communities informed by bridging the gap between traditional news sites and the decentralized social web.
+A Python-based bot that automatically fetches news articles from RSS feeds and HTML sources, filters them based on configurable criteria, and posts them to Bluesky.
 
-## 🚀 Features
+**Live bot:** [@hbgpalocalnews.bsky.social](https://bsky.app/profile/hbgpalocalnews.bsky.social)
 
-* **Automated Scraping:** Each run checks local news websites for new stories.
-* **Bluesky Integration:** Automatically formats and posts news updates to your Bluesky profile.
-* **Rich Embeds:** Supports posting with titles, descriptions, and article links.
-* **Deduplication:** Ensures the same news story isn't posted multiple times (uses sqlite).
-* **Headless Operation:** This is a simple python script that can be run on anything that runs python.
-* **AI Summaries!** Optionally uses Google AI Studio to generate articles summaries for posts.
+## Features
 
-## 🛠️ Tech Stack
+- **Multi-source article fetching**: Supports RSS feeds and HTML-based news sources
+- **Intelligent filtering**: Removes spam, duplicates, and unwanted content using configurable word filters
+- **Admin commands**: Accept commands via Bluesky DMs to manage filters and bot behavior
+- **AI summarization**: Optional Google GenAI integration for article summaries
+- **Database tracking**: Keeps records of posted and excluded articles
+- **Comprehensive logging**: Full debug logging with file and console output
+- **Automated scheduling**: Run via cron job for continuous operation
 
-* **Language:** Python
-* **API:** [AT Protocol (atproto)](https://atproto.com/) for Bluesky interactions.
-* **Scraping:** feedparser (RSS) / newspaper3k (HTML)
-* **Scheduling:** cron etc.
+## Installation
 
-## 📋 Prerequisites
-
-Before running the bot, you will need:
-
-* A Bluesky account for the bot to use.
-* An **App Password** from Bluesky (Settings -> App Passwords).
-* Python 3.x installed.
-
-## ⚙️ Installation
-
-1. **Clone the repository:**
+1. Clone the repository:
 ```bash
-git clone https://github.com/cheracc/localnewsbot.git
+git clone https://github.com/yourusername/localnewsbot.git
 cd localnewsbot
-
 ```
 
-
-2. **Install dependencies:**
+2. Install dependencies:
 ```bash
-pip install newspaper3k
-pip install feedparser
-pip install beautifulsoup4
+pip install -r requirements.txt
+```
+
+3. Create `config.yml` in the root directory with your configuration
+
+4. Set up your Bluesky credentials and API keys in the config
+
+## Configuration
+
+Create a `config.yml` file with the following structure:
+
+```yaml
+bluesky:
+  handle: your-handle.bsky.social
+  password: your-app-password
+
+gemini:
+  api_key: your-gemini-api-key
+
+rss_feeds:
+  feed_name:
+    url: https://example.com/feed.xml
+    tag: news
+
+html_sources:
+  source_name:
+    url: https://example.com/news
+    tag: news
+
+filters:
+  bad_words:
+    - spam
+    - clickbait
+  good_words:
+    - breaking
+    - exclusive
+
+delay_between_posts: 2
+log_level: INFO
+```
+
+## Usage
+
+### Run once (fetch and post articles):
+```bash
+python3 bot.py
+```
+
+### Run without posting (check articles only):
+```bash
+python3 bot.py --no-posts
+```
+
+### Schedule with cron (every minute except multiples of 5):
+```bash
+* * * * * [ $(($(date +\%M) \% 5)) -ne 0 ] && cd /home/shawn/localnewsbot && /usr/bin/python3 bot.py --no-posts
+```
+
+## Admin Commands
+
+Send commands via Bluesky DMs to manage the bot:
+
+- `/help` - Display available commands
+- `/addbadword <word>` - Add a word to the filter blacklist
+- `/removebadword <word>` - Remove a word from the filter blacklist
+
+## Project Structure
 
 ```
-and potentially any other ones it yells at you about
+localnewsbot/
+├── bot.py                      # Main entry point
+├── config.yml                  # Configuration file
+├── database.sqlite             # Article tracking database
+├── log/                        # Daily log files
+└── src/
+    ├── config.py               # Configuration loader
+    ├── bsky_account.py         # Bluesky authentication
+    ├── bsky_chat_handler.py    # Command handling via DMs
+    ├── bsky_post_handler.py    # Article posting
+    ├── bsky_post.py            # BskyPost data class
+    ├── rsssource.py            # RSS feed fetching
+    ├── htmlsource.py           # HTML source scraping
+    ├── newsfilter.py           # Article filtering logic
+    ├── aisummary.py            # AI-powered summarization
+    ├── commands.py             # Command definitions
+    └── data.py                 # Database management
+```
 
+## Logging
 
-3. **Configuration:**
+Logs are written to `log/bot_YYYYMMDD.log` with timestamps and log levels. Set `log_level` in `config.yml` to control verbosity:
 
-Rename the `config examples` directory to `config` add your bot's info, and modify to suit:
-- `config.yml` contains the main settings, bot password, etc.
-- `feeds.yml` is where you enter the info for the feeds you want to watch
-- `filter.yml` is where you enter your good and bad words for the article filter
-- `tags.yml` is where you can make #tags and set keywords that will cause articles to be tagged
-
-## Filtering
-
-use `bad_words` and `good_words` in config.yml. Filtering works like this:
-1. any articles with a `bad_word` in the title, description, or url are removed UNLESS they also contain a `good_word`
-2. any custom filters are run. Place these in a `customfilters.py` file with a filter(articles) function (see `customfilters.py.example`)
+- `DEBUG` - Detailed information for development
+- `INFO` - General informational messages
+- `WARNING` - Warning messages and non-critical errors
+- `ERROR` - Error messages with full stack traces
 
 ## Database
 
-This uses an sqlite database to keep track and avoid duplicates. It will create this itself
+The bot maintains a SQLite database (`database.sqlite`) with two tables:
 
-## 🚀 Usage
+- `posts` - Tracks articles that have been posted
+- `excluded` - Tracks articles that were filtered out
 
-To start the bot manually, run:
+This prevents duplicate posts and allows for analysis of filtered content.
 
-```bash
-python bot.py
+## Disclaimer
 
-```
-
-## 🤖 Deployment
-
-use cron or some other service to run `bot.py` at the desired interval
-
-## 📄 License
-
-Distributed under the MIT NON-AI License. See `LICENSE` for more information.
-
----
-
-### Contact
-
-🙅 Please don't 🙅
-
-**Project Link:** [https://github.com/cheracc/localnewsbot](https://www.google.com/search?q=https://github.com/cheracc/localnewsbot)
-
-### This is offered as is, no support will be provided.
+This project is offered as-is without support. Use at your own risk.
