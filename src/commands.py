@@ -23,6 +23,8 @@ class CommandHandler:
         self.register_command(BotCommand(self.config, "/removegoodword", remove_good_words))
         self.register_command(BotCommand(self.config, "/addkeywordstotag", add_keywords_to_tag))
         self.register_command(BotCommand(self.config, "/removekeywordsfromtag", remove_keywords_from_tag))
+        self.register_command(BotCommand(self.config, "/showprompt", show_prompt))
+        self.register_command(BotCommand(self.config, "/setprompt", set_prompt))
 
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
@@ -139,3 +141,16 @@ def add_keywords_to_tag(config: Config, args: list[str]) -> CommandResponse:
     if config.add_keywords_to_tag(tag, keywords):
         return CommandResponse(True, f"Created new tag #{tag} and added {len(keywords)} keywords to it.")
     return CommandResponse(True, f"Added {len(keywords)} keywords to existing tag #{tag}")
+
+def show_prompt(config: Config, args: list[str]) -> CommandResponse:
+    prompt = config.get_prompt()
+    if not prompt:
+        return CommandResponse(False, "No prompt is currently set.")
+    return CommandResponse(True, f"The current AI summary prompt is:\n\n{prompt}")
+
+def set_prompt(config: Config, args: list[str]) -> CommandResponse:
+    if not args or len(args) == 0:
+        return CommandResponse(False, 'Syntax: /setprompt "Your new prompt goes here"')
+    new_prompt = " ".join(args)
+    config.save_new_prompt(new_prompt)
+    return CommandResponse(True, "AI summary prompt updated.")
