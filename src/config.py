@@ -19,9 +19,11 @@ class Config:
         self.__bsky_account = None
         self.db = DatabaseManager()
         self.news_filter = NewsFilter(self)
-        self.summarizer = Summarizer(self)
+        self.summarizer = None
 
     def get_summarizer(self) -> Summarizer:
+        if self.summarizer is None:
+            self.summarizer = Summarizer(self)
         return self.summarizer
     
     def load_configs(self) -> None:
