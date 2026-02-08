@@ -91,9 +91,11 @@ def list_keywords_for_tag(config: Config, args: list[str]) -> CommandResponse:
     return CommandResponse(True, keyword_string)
 
 def list_bad_words(config: Config, args: list[str]) -> CommandResponse:
-    bad_words = config.get_bad_words()
-    return CommandResponse(True, "|".join(bad_words))
+    bad_words = "|".join(config.get_bad_words())
+    response = f"Here are all the bad words:\n\n{bad_words}"
+    return CommandResponse(True, response)
 
 def list_good_words(config: Config, args: list[str]) -> CommandResponse:
-    good_words = config.get_good_words()
-    return CommandResponse(True, "|".join(good_words))
+    good_words = "|".join(config.get_good_words())
+    response = f"Here are all the good words:\n\n{good_words}"
+    return CommandResponse(True, response)
