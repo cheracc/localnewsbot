@@ -203,6 +203,13 @@ class Config:
         self.save_config("config/tags.yml", self.__tags_config)
         return found
     
+    def get_prompt(self) -> str:
+        return self.__main_config.get("ai_summary_prompt", "")
+    
+    def save_new_prompt(self, prompt: str) -> None:
+        self.__main_config["ai_summary_prompt"] = prompt
+        self.save_config("config/config.yml", self.__main_config)
+    
     def __add_keyword_to_tag(self, tag: str, keyword: str) -> bool:
         created = False
         if tag not in self.__tags_config:

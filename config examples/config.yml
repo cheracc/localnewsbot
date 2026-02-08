@@ -1,14 +1,21 @@
+# The handle of the account the bot will post from
 bsky_handle: "yourbothandle.bsky.social"
+# App password (Settings > Privacy & Security > App Passwords) MUST HAVE PRIVATE MESSAGE ACCESS for admin commands
 bsky_password: "your-bots-app-paswd"
+# The handle of the account that will receive admin commands via DM, can be the same if you just want to DM yourself
+admin_bsky_handle: cheracc.bsky.social
+# Wait time between posts to avoid rate limits, in seconds
 delay_between_posts_in_seconds: 2
+# The number of articles to fetch from each feed. This mostly matters on first run or when it's been awhile
 max_articles_per_feed: 10
+# The bot will not post articles older than this many days, to avoid posting stale news.
 max_article_age_days: 7
 # log_level can be one of: DEBUG, INFO, WARNING
 log_level: "INFO"
 pds_url: "https://bsky.social"
-# Set to your actual API key or leave empty to disable AI summarization
+# Set to your Google AI Studio API key or leave empty to disable AI summarization
 gemini_api_key: ""
-#gemini_model: "gemma-3-27b-it" gemma models have high free rate quotas, these 2 seem to perform best for this, try
+#gemini_model: "gemma-3-27b-it" gemma models have high free rate quotas, these 2 seem to perform best for this. See others on your Google AI Studio dashboard
 gemini_model: "gemma-3n-e4b-it"
 ai_summary_prompt: "Summarize this article very briefly and concisely, in fewer than 220 characters. 
   Write as if you were a non-biased resident of the [your local] area sharing important information with 
