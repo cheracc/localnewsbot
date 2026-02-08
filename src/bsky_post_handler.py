@@ -73,10 +73,10 @@ class BskyPostHandler:
         return facets
 
     def get_embed_card(self, bsky_post: BskyPost) -> models.AppBskyEmbedExternal.Main:
-        card= models.AppBskyEmbedExternal.External(
-            uri = bsky_post.link,
-            title = bsky_post.headline,
-            description = bsky_post.description,
+        card = models.AppBskyEmbedExternal.External(
+            uri=bsky_post.link,
+            title=re.sub(r'<[^>]+>', '', bsky_post.headline),
+            description=re.sub(r'<[^>]+>', '', bsky_post.description),
         )
         img_url = bsky_post.img_url
 
