@@ -14,7 +14,7 @@ def main():
 
     try:
         config.get_bsky_account().get_chat_handler().check_for_commands()
-        fetch_filter_and_post(config)
+        #fetch_filter_and_post(config)
     except Exception as e:
         config.logger.error(f"An error occurred: {e}")
         raise

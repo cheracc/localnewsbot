@@ -3,7 +3,6 @@ import logging
 import newspaper
 from src.config import Config
 from src.bsky_post import BskyPost
-from src.aisummary import Summarizer
 from newspaper import Article as HTMLArticle
 
 # WebNewsSource handles parsing news articles from HTML sources using the newspaper3k library

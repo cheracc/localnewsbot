@@ -86,14 +86,12 @@ class BskyPostHandler:
                 self.logger.debug(f"Attempting to get imageblob for {img_url}")
                 resp = requests.get(img_url)
                 resp.raise_for_status()
-                self.logger.debug(f"embed_card img: {resp.content}")
                 self.client.login()
                 card.thumb = self.client.upload_blob(resp.content).blob
             except Exception as e:
                 self.logger.warning(f"Could not fetch image for embed card: {bsky_post.img_url},{e}")
                 card.thumb = None
 
-        self.logger.debug(f"assembled embed_card: {card}")
         return models.AppBskyEmbedExternal.Main(external = card)
 
     def create_post_new(self, bsky_post: BskyPost) -> bool:
