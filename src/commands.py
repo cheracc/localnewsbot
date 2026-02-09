@@ -14,11 +14,14 @@ class CommandHandler:
 
     def register_commands(self):
         self.register_command(BotCommand(self.config, "/help", help_command))
+        self.register_command(BotCommand(self.config, "/addsuperbadword", add_super_bad_word_to_filter))
         self.register_command(BotCommand(self.config, "/addbadword", add_bad_word_to_filter))
         self.register_command(BotCommand(self.config, "/addgoodword", add_good_word_to_filter))
         self.register_command(BotCommand(self.config, "/listtagkeywords", list_keywords_for_tag))
+        self.register_command(BotCommand(self.config, "/listsuperbadwords", list_super_bad_words))
         self.register_command(BotCommand(self.config, "/listbadwords", list_bad_words))
         self.register_command(BotCommand(self.config, "/listgoodwords", list_good_words))
+        self.register_command(BotCommand(self.config, "/removesuperbadword", remove_super_bad_words))
         self.register_command(BotCommand(self.config, "/removebadword", remove_bad_words))
         self.register_command(BotCommand(self.config, "/removegoodword", remove_good_words))
         self.register_command(BotCommand(self.config, "/addkeywordstotag", add_keywords_to_tag))
@@ -26,7 +29,7 @@ class CommandHandler:
         self.register_command(BotCommand(self.config, "/showprompt", show_prompt))
         self.register_command(BotCommand(self.config, "/setprompt", set_prompt))
         self.register_command(BotCommand(self.config, "/recentlyexcluded", recently_excluded))
-        
+
 
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
@@ -76,6 +79,13 @@ def help_command(config: Config, args: list[str]) -> CommandResponse:
     reply = reply + "\n\nType a command by itself for syntax hints."
     return CommandResponse(True, reply.rstrip())
 
+# Example message: /addsuperbadword istanbul
+def add_super_bad_word_to_filter(config: Config, args: list[str]) -> CommandResponse:
+    if not args or len(args) == 0:
+        return CommandResponse(False, 'Syntax: /addsuperbadword word1 "word two" ...')
+    config.add_super_bad_words(args)
+    return CommandResponse(True, f"Added {len(args)} super bad words")
+
 # Example message: /addbadword istanbul
 def add_bad_word_to_filter(config: Config, args: list[str]) -> CommandResponse:
     if not args or len(args) == 0:
@@ -98,6 +108,13 @@ def list_keywords_for_tag(config: Config, args: list[str]) -> CommandResponse:
         return CommandResponse(False, f"I do not have any keywords for #{args[0]}")
     return CommandResponse(True, f"#{args[0]} will be added if any of these words are found:\n\n{keyword_string}")
 
+def list_super_bad_words(config: Config, args: list[str]) -> CommandResponse:
+    super_bad_words = "|".join(config.get_super_bad_words())
+    if not super_bad_words:
+        return CommandResponse(True, "No super bad words are currently configured.")
+    response = f"Here are all the super bad words:\n\n{super_bad_words}\n\nSuper bad word matches cannot be overridden by good words. Matching is case-insensitive."
+    return CommandResponse(True, response)
+
 def list_bad_words(config: Config, args: list[str]) -> CommandResponse:
     bad_words = "|".join(config.get_bad_words())
     response = f"Here are all the bad words:\n\n{bad_words}\n\nA bad word match is overridden if a good word is also present. Matching is case-insensitive."
@@ -107,6 +124,13 @@ def list_good_words(config: Config, args: list[str]) -> CommandResponse:
     good_words = "|".join(config.get_good_words())
     response = f"Here are all the good words:\n\n{good_words}\n\nA good word match overrides bad words. Matching is case-insensitive."
     return CommandResponse(True, response)
+
+def remove_super_bad_words(config: Config, args: list[str]) -> CommandResponse:
+    removed = config.remove_super_bad_words(args)
+    if removed == 0:
+        return CommandResponse(False, "None of those words were found in the super bad words list.")
+    else:
+        return CommandResponse(True, f"Removed {removed} super bad words.")
 
 def remove_bad_words(config: Config, args: list[str]) -> CommandResponse:
     removed = config.remove_bad_words(args)
