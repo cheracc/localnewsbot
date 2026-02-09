@@ -40,7 +40,7 @@ class BskyPost:
 
 
     def post_to_bluesky(self) -> None: 
-        self.config.logger.info(f"Posting article: {self.headline}")
+        self.config.logger.debug(f"  Posting article: {self.headline}")
         start_time = time.time()
         self.post_text = self.get_post_text().rstrip()
         self.config.logger.debug(f"  Generated post text: {self.post_text}")
