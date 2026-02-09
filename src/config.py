@@ -100,6 +100,12 @@ class Config:
         
         return ''
     
+    def get_super_bad_words(self) -> list[str]:
+        super_bad_words = self.__filter_config.get("super_bad_words", []) or []
+        if not isinstance(super_bad_words, list):
+            raise ValueError("super_bad_words in config must be a list")
+        return super_bad_words
+
     # Returns the list of bad words from config
     def get_bad_words(self) -> list[str]:
         bad_words = self.__filter_config.get("bad_words", []) or []

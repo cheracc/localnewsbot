@@ -3,6 +3,8 @@ rss_feeds:
     name: "ABC27 Local News" # the friendly name for the feed, only used in logging atm
     url: "https://www.abc27.com/local-news/rss" # the URL of the RSS feed to pull articles from
     tag: "ABC27" # the #tag to add to posts from this feed
+    # The default image to use if an article doesn't have one. Optional, but recommended to avoid posts without images.
+    defaultimage: "https://bloximages.newyork1.vip.townnews.com/lancasteronline.com/content/tncms/assets/v3/editorial/0/a7/0a74c5f8-fbb4-11e3-aec4-001a4bcf6878/53a99900b2301.image.png"
   pennlive:
     name: "PennLive"
     url: "https://www.pennlive.com/arc/outboundfeeds/rss/"
