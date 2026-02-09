@@ -19,6 +19,8 @@ filter_type: "keyword"
 gemini_api_key: ""
 gemini_model: "gemma-3-27b-it" # Gemma models have high free rate quotas, these 2 seem to perform best for this. Find other options on your Google AI Studio dashboard
 #gemini_model: "gemma-3n-e4b-it"
+# Which filter to use - keyword or ai
+filter_type: keyword
 # AI filter quality threshold: 0.0-1.0 where 1.0 is highest quality. Only used when filter_type is "ai"
 ai_filter_quality_threshold: 0.6
 ai_summary_prompt: 'System/Role: You are a professional news curator known for elegant,

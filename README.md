@@ -7,11 +7,13 @@ LocalNewsBot is a Python bot that collects articles from RSS feeds and websites,
 ## Features
 
 - Fetches news from multiple RSS and HTML sources  
-- Filters duplicates and unwanted content  
+- Filters unwanted content using keywords or an AI-rating scale
 - Posts automatically to Bluesky
-- Optional GenAI summaries (uses Google AI Studio which has free limits way higher than needed for this)
+- Optional GenAI summaries 
 - Admin control via Bluesky DMs  
 - SQLite database to track posted articles  
+
+All of the AI features are initially configured to use Google AI Studio's Gemma-27B model (you just need to do a few clicks to get a free API key), which (for now) has quite high quotas for the free tier, so you can easily run this bot's AI features for free!
 
 ---
 
