@@ -7,6 +7,8 @@ from src.data import DatabaseManager
 from src.bsky_account import BskyAccount
 from typing import Dict, Any
 from src.newsfilter import NewsFilter
+from src.keywordfilter import KeywordFilter
+from src.aifilter import AIFilter
 import yaml
 import logging
 
@@ -18,13 +20,33 @@ class Config:
         self.logger = self.__create_logger()
         self.__bsky_account = None
         self.db = DatabaseManager()
-        self.news_filter = NewsFilter(self)
+        self.news_filter = self._initialize_filter()
         self.summarizer = None
 
     def get_summarizer(self) -> Summarizer:
         if self.summarizer is None:
             self.summarizer = Summarizer(self)
         return self.summarizer
+    
+    def _initialize_filter(self) -> NewsFilter:
+        """Initialize the appropriate filter based on config setting."""
+        filter_type = self.__main_config.get("filter_type", "keyword").lower()
+        
+        if filter_type == "ai":
+            self.logger.info("Using AI-based news filter")
+            return AIFilter(self)
+        else:
+            self.logger.info("Using keyword-based news filter")
+            return KeywordFilter(self)
+    
+    def get_ai_filter_quality_threshold(self) -> float:
+        """Get the quality threshold for AI filter (0.0-1.0)."""
+        threshold = self.__main_config.get("ai_filter_quality_threshold", 0.6)
+        try:
+            value = float(threshold)
+            return max(0.0, min(1.0, value))  # Clamp to 0-1
+        except (ValueError, TypeError):
+            return 0.6
     
     def load_configs(self) -> None:
         self.__main_config = self.read_config("config/config.yml")
