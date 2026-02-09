@@ -43,7 +43,6 @@ class BskyChatHandler:
     def __get_admin_convo(self) -> models.ChatBskyConvoDefs.ConvoView:
         try:
             admin_did = self.__get_admin_did()
-            self.config.logger.debug(f"Admin did: {admin_did}")
             params = models.ChatBskyConvoGetConvoForMembers.Params(members=[admin_did])
             convo = self.dm.get_convo_for_members(params=params).convo
             self.config.logger.debug(f"Found chat with admin {self.config.get_admin_handle().split(".")[0]}")
