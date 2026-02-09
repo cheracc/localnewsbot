@@ -14,21 +14,21 @@ class CommandHandler:
 
     def register_commands(self):
         self.register_command(BotCommand(self.config, "/help", help_command))
-        self.register_command(BotCommand(self.config, "/addsuperbadword", add_super_bad_word_to_filter))
-        self.register_command(BotCommand(self.config, "/addbadword", add_bad_word_to_filter))
-        self.register_command(BotCommand(self.config, "/addgoodword", add_good_word_to_filter))
-        self.register_command(BotCommand(self.config, "/listtagkeywords", list_keywords_for_tag))
-        self.register_command(BotCommand(self.config, "/listsuperbadwords", list_super_bad_words))
+        self.register_command(BotCommand(self.config, "/addbadwords", add_bad_word_to_filter))
+        self.register_command(BotCommand(self.config, "/addgoodwords", add_good_word_to_filter))
+        self.register_command(BotCommand(self.config, "/addkeywordstotag", add_keywords_to_tag))
+        self.register_command(BotCommand(self.config, "/addsuperbadwords", add_super_bad_word_to_filter))
         self.register_command(BotCommand(self.config, "/listbadwords", list_bad_words))
         self.register_command(BotCommand(self.config, "/listgoodwords", list_good_words))
-        self.register_command(BotCommand(self.config, "/removesuperbadword", remove_super_bad_words))
-        self.register_command(BotCommand(self.config, "/removebadword", remove_bad_words))
-        self.register_command(BotCommand(self.config, "/removegoodword", remove_good_words))
-        self.register_command(BotCommand(self.config, "/addkeywordstotag", add_keywords_to_tag))
-        self.register_command(BotCommand(self.config, "/removekeywordsfromtag", remove_keywords_from_tag))
-        self.register_command(BotCommand(self.config, "/showprompt", show_prompt))
-        self.register_command(BotCommand(self.config, "/setprompt", set_prompt))
+        self.register_command(BotCommand(self.config, "/listsuperbadwords", list_super_bad_words))
+        self.register_command(BotCommand(self.config, "/listtagkeywords", list_keywords_for_tag))
         self.register_command(BotCommand(self.config, "/recentlyexcluded", recently_excluded))
+        self.register_command(BotCommand(self.config, "/removebadwords", remove_bad_words))
+        self.register_command(BotCommand(self.config, "/removegoodwords", remove_good_words))
+        self.register_command(BotCommand(self.config, "/removekeywordsfromtag", remove_keywords_from_tag))
+        self.register_command(BotCommand(self.config, "/removesuperbadwords", remove_super_bad_words))
+        self.register_command(BotCommand(self.config, "/setprompt", set_prompt))
+        self.register_command(BotCommand(self.config, "/showprompt", show_prompt))
 
 
     # checks text for any command keywords, and executes the command if found
