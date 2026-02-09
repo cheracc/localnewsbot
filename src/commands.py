@@ -34,18 +34,18 @@ class CommandHandler:
 
     # checks text for any command keywords, and executes the command if found
     def parse_commands(self, text: str) -> CommandResponse | None:
-        self.config.logger.debug(f"Evaluating message text for command keywords: {text}")
+        self.config.logger.debug(f"  Evaluating message text for command keywords: {text}")
         split = shlex.split(text)
         if not split:
             return None
         args = split[1:]
         command = split[0].lower()
         if not command:
-            self.config.logger.debug("No commands found")
+            self.config.logger.debug("  No commands found")
             return None
         for cmd in self.commands:
             if cmd.command_string == command:
-                self.config.logger.debug(f"Found command {cmd.command_string}, passing args: {args}")
+                self.config.logger.debug(f"  Found command {cmd.command_string}, passing args: {args}")
                 return_value = cmd.command_func(self.config, args)
                 return return_value
         return None

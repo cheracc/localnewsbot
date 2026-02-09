@@ -64,7 +64,7 @@ class BskyAccount():
         if not self.__did:
             try:
                 self.__did = self.client.resolve_handle(self.handle).did
-                self.config.logger.debug(f"Resolved DID for {self.handle}: {self.__did}")
+                self.config.logger.debug(f"  Resolved DID for {self.handle}: {self.__did}")
             except AtProtocolError as e:
                 self.config.logger.error(f"Error fetching DID for {self.handle}: {e}")
                 raise
