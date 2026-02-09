@@ -138,11 +138,12 @@ class DatabaseManager:
             conn.execute(
                 """
                 DELETE FROM excluded
-                WHERE id IN (
-                    SELECT id FROM excluded
-                    ORDER BY excluded_at DESC
-                    LIMIT ?
-                )
+                    WHERE id IN (
+                        SELECT id
+                        FROM excluded
+                        ORDER BY id DESC
+                        LIMIT ?
+                 )
                 """,
                 (num_to_remove,)
             )
