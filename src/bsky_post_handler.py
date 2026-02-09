@@ -82,7 +82,7 @@ class BskyPostHandler:
 
         if img_url and len(img_url) > 0:
             try:
-                self.logger.debug(f"Attempting to get imageblob for {img_url}")
+                self.logger.debug(f"  Attempting to get imageblob for {img_url}")
                 resp = requests.get(img_url)
                 resp.raise_for_status()
                 self.config.get_bsky_account().login()
@@ -95,7 +95,7 @@ class BskyPostHandler:
             img_url = self.get_img_url_from_open_graph(bsky_post=bsky_post)
             if img_url and len(img_url) > 0:
                 try:
-                    self.logger.debug(f"Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url}")
+                    self.logger.debug(f"  Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url}")
                     resp = requests.get(img_url)
                     resp.raise_for_status()
                     self.config.get_bsky_account().login()
@@ -105,7 +105,7 @@ class BskyPostHandler:
                         try: #try with flaresolverr proxy if we got an HTTP error, in case it's a bot protection issue
                             proxy_url = 'http://localhost:8191/v1'
                             if proxy_url:
-                                self.logger.debug(f"Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url} with FlareSolverr proxy")
+                                self.logger.debug(f"  Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url} with FlareSolverr proxy")
                                 resp = requests.post(proxy_url, 
                                                     headers={"Content-Type": "application/json"},
                                                     params={"cmd": "requests.get", "url": img_url, "max_timeout": 60000})

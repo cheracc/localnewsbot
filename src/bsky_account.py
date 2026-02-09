@@ -30,7 +30,7 @@ class BskyAccount():
 
     def login(self) -> None:
         if self.session_string:
-            self.config.logger.debug("Using existing session string to authenticate")
+            self.config.logger.debug("  Using existing session string to authenticate")
             try:
                 self.client.login(session_string=self.session_string)
                 return
