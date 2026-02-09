@@ -24,7 +24,7 @@ class BskyChatHandler:
         if self.__parse_messages(messages, convo.id):
             self.config.logger.info(" Processed admin chat messages")
         else:
-            self.config.logger.info(" No admin chat messages to process")    
+            self.config.logger.info("   No admin chat messages to process")    
 
     def __get_admin_did(self) -> str:
         admin_handle = self.config.get_admin_handle()
