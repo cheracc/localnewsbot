@@ -22,3 +22,9 @@ good_words:
   - "Susquehanna"
   - "Capital Area"
   - "Midstate"
+super_bad_words:
+  - "Trump"
+  - "Biden"
+  - "casino"
+  - "sweepstakes"
+  - "betmgm"

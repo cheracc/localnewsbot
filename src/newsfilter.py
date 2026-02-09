@@ -13,6 +13,7 @@ class NewsFilter:
 
     def filter(self, articles: list[BskyPost]) -> list[BskyPost]:
         self.bad_words = self.config.get_bad_words()
+        self.super_bad_words = self.config.get_super_bad_words()
         good_words = self.config.get_good_words()
         previously_posted = []
 
@@ -37,8 +38,9 @@ class NewsFilter:
         super_removed_articles = []
 
         for filter_fn in (self.filter_body, self.filter_url, self.filter_headlines):
-            keep, toss = filter_fn(working_articles)
+            keep, toss, super_toss = filter_fn(working_articles)
             removed_articles.extend(toss)
+            super_removed_articles.extend(super_toss)
             working_articles = keep  # continue filtering only the kept articles
         
         # Apply any custom filters defined in customfilters.py. Create your own filters by making a customfilters.py file
@@ -54,7 +56,7 @@ class NewsFilter:
         except ImportError:
             pass
 
-        for article in removed_articles[:]:
+        for article in removed_articles:
             if any(phrase in article.headline for phrase in good_words):
                 self.logger.debug(f"Restoring due to ok phrase match: {article.headline}")
                 working_articles.append(article)
@@ -68,46 +70,58 @@ class NewsFilter:
             
         self.logger.debug(f"Added {len(removed_articles)} articles to 'excluded' table in database")
 
-        self.logger.info("The following articles (headlines) were removed by filters:")
+        self.logger.info("The following articles were removed by filters:")
         for article in removed_articles:
-            self.logger.info(f"  -  {article.headline}")
+            self.logger.info(f"  -  {article.headline}({article.source_name})")
         
 
         return working_articles
     
     # Applies headline, body, and URL filters
-    def filter_headlines(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]: 
+    def filter_headlines(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost], list[BskyPost]]: 
         filtered_articles = []
         removed_articles = []
+        super_removed_articles = []
         for article in articles:
-            if not any(word.lower() in article.headline.lower() for word in self.bad_words):
+            if not any(word.lower() in article.headline.lower() for word in (self.bad_words + self.super_bad_words)):
                 filtered_articles.append(article)
+            elif any(word.lower() in article.headline.lower() for word in self.super_bad_words):
+                super_removed_articles.append(article)
+                self.logger.debug(f"Excluding due to headline super filter: {article.headline}")
             else:
                 removed_articles.append(article)
                 self.logger.debug(f"Excluding due to headline filter: {article.headline}")
-        return filtered_articles, removed_articles
+        return filtered_articles, removed_articles, super_removed_articles
     
-    def filter_body(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]:
+    def filter_body(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost], list[BskyPost]]:
         filtered_articles = []
         removed_articles = []
+        super_removed_articles = []
         for article in articles:
-            if not any(word.lower() in article.description.lower() for word in self.bad_words):
+            if not any(word.lower() in article.description.lower() for word in (self.bad_words + self.super_bad_words)):
                 filtered_articles.append(article)
+            elif any(word.lower() in article.description.lower() for word in self.super_bad_words):
+                super_removed_articles.append(article)
+                self.logger.debug(f"Excluding due to body super filter: {article.headline}")
             else:
                 removed_articles.append(article)
                 self.logger.debug(f"Excluding due to body filter: {article.headline}")
-        return filtered_articles, removed_articles
+        return filtered_articles, removed_articles, super_removed_articles
     
-    def filter_url(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost]]:
+    def filter_url(self, articles: list[BskyPost]) -> tuple[list[BskyPost], list[BskyPost], list[BskyPost]]:
         filtered_articles = []
         removed_articles = []
+        super_removed_articles = []
         for article in articles:
             cleaned_url = article.link.replace("/", " ").replace(".", " ").replace("-", " ")
             self.logger.debug(f"Cleaned URL for filtering: {cleaned_url}")
-            if not any(word.lower() in cleaned_url.lower() for word in self.bad_words):
+            if not any(word.lower() in cleaned_url.lower() for word in (self.bad_words + self.super_bad_words)):
                 filtered_articles.append(article)
                 self.logger.debug(f"URL passed filter: {article.link}")
+            elif any(word.lower() in cleaned_url.lower() for word in self.super_bad_words):
+                super_removed_articles.append(article)
+                self.logger.debug(f"Excluding due to URL super filter: {article.headline}")
             else:
                 removed_articles.append(article)
                 self.logger.debug(f"Excluding due to URL filter: {article.headline}")
-        return filtered_articles, removed_articles
+        return filtered_articles, removed_articles, super_removed_articles
