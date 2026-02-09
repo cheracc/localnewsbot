@@ -47,7 +47,7 @@ def fetch_filter_and_post(config: Config):
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
         start_time = time.time()
-        config.logger.info("LocalNewsBot is checking for new articles...")
+        config.logger.info(" LocalNewsBot is checking for new articles...")
         articles = src.rsssource.get_rss_feeds(config)
         articles.extend(src.htmlsource.get_html_sources(config))
         if not articles:
