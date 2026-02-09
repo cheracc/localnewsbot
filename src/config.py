@@ -170,6 +170,7 @@ class Config:
     def save_config(self, path: str, data: Dict[str, Any]) -> None:
         with open(path, "w", encoding="utf-8") as f:
             yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+            self.logger.debug(f"Saved updated config to {path}")
 
     def get_saved_session(self) -> str:
         return self.__session["session_string"] if self.__session else ""
