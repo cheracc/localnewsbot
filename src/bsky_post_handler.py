@@ -106,7 +106,7 @@ class BskyPostHandler:
                             proxy_url = 'http://localhost:8191/v1'
                             if proxy_url:
                                 self.logger.debug(f"Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url} with FlareSolverr proxy")
-                                resp = requests.get(proxy_url, 
+                                resp = requests.post(proxy_url, 
                                                     headers={"Content-Type": "application/json"},
                                                     params={"cmd": "requests.get", "url": img_url, "max_timeout": 60000})
                                 resp.raise_for_status()

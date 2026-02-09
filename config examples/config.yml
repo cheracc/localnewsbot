@@ -2,8 +2,8 @@
 bsky_handle: "yourbothandle.bsky.social"
 # App password (Settings > Privacy & Security > App Passwords) MUST HAVE PRIVATE MESSAGE ACCESS for admin commands
 bsky_password: "your-bots-app-paswd"
-# The handle of the account that will receive admin commands via DM, can be the same if you just want to DM yourself
-admin_bsky_handle: cheracc.bsky.social
+# The handle of the account that will receive admin commands via DM, can be the same if you just want to DM yourself from the bot
+admin_bsky_handle: yourpersonal.bsky.social
 # Wait time between posts to avoid rate limits, in seconds
 delay_between_posts_in_seconds: 2
 # The number of articles to fetch from each feed. This mostly matters on first run or when it's been awhile
@@ -15,13 +15,20 @@ log_level: "INFO"
 pds_url: "https://bsky.social"
 # Set to your Google AI Studio API key or leave empty to disable AI summarization
 gemini_api_key: ""
-#gemini_model: "gemma-3-27b-it" gemma models have high free rate quotas, these 2 seem to perform best for this. See others on your Google AI Studio dashboard
-gemini_model: "gemma-3n-e4b-it"
-ai_summary_prompt: "Summarize this article very briefly and concisely, in fewer than 220 characters. 
-  Write as if you were a non-biased resident of the [your local] area sharing important information with 
-  other area residents. It is very important that it is no longer than 220 characters. Do not add any 
-  hashtags. Do not add any lead-ins. These news articles should all be from the south central pennsylvania 
-  area, so do not assume they are referring to anything outside this region. Do not use proper names of 
-  crime victims, perpetrators, or accident victims in your summary. If there is not enough text to summarize,
-  rephrase the headline or simply use it as your summary. Do not state the character count or any other 
-  analysis of your output. Here is the article: "
+gemini_model: "gemma-3-27b-it" # Gemma models have high free rate quotas, these 2 seem to perform best for this. Find other options on your Google AI Studio dashboard
+#gemini_model: "gemma-3n-e4b-it"
+ai_summary_prompt: 'System/Role: You are a professional news curator known for elegant,
+  punchy, and objective summaries.
+
+  ​Task: Summarize the main point of the news article at the link provided below.
+
+  ​Constraints:
+
+  ​Length: The summary must be under 220 characters (including spaces).
+
+  ​Style: Use an active voice. Avoid clickbait.
+
+  ​Format: Provide only the summary text. Do not include introductory phrases like
+  "Here is a summary" or "The article says." Or the word count
+
+  ​Article Link:'
