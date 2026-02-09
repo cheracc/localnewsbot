@@ -26,9 +26,9 @@ class Summarizer:
             # Test the API key with a simple call
             self.client.models.list()
             self.enabled = True
-            self.logger.info("Gemini API initialized successfully. AI summarization enabled.")
+            self.logger.info("  Gemini API initialized successfully. AI summarization enabled.")
         except Exception as e:
-            self.logger.warning(f"Error initializing Gemini API: {e}. AI summarization disabled.")
+            self.logger.warning(f"  Error initializing Gemini API: {e}. AI summarization disabled.")
 
     def summarize(self, link_to_article: str) -> str:
         """Summarize an article using Gemini API. Returns empty string if disabled or on error."""
