@@ -70,7 +70,7 @@ class NewsFilter:
             
         self.logger.debug(f"Added {len(removed_articles)} articles to 'excluded' table in database")
 
-        self.logger.info("The following articles were removed by filters:")
+        self.logger.info(" The following articles were removed by filters:")
         for article in removed_articles:
             self.logger.info(f"  -  {article.headline}({article.source_name})")
         
