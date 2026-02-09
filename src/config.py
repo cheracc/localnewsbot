@@ -20,8 +20,15 @@ class Config:
         self.logger = self.__create_logger()
         self.__bsky_account = None
         self.db = DatabaseManager()
-        self.news_filter = self._initialize_filter()
+        self._news_filter = None
         self.summarizer = None
+
+    @property
+    def news_filter(self) -> NewsFilter:
+        """Lazy initialization of news filter on first access."""
+        if self._news_filter is None:
+            self._news_filter = self._initialize_filter()
+        return self._news_filter
 
     def get_summarizer(self) -> Summarizer:
         if self.summarizer is None:
