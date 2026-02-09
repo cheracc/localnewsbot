@@ -131,6 +131,25 @@ class DatabaseManager:
         finally:
             conn.close()
 
+    def remove_recently_excluded_articles(self, num_to_remove: int) -> None:
+        """Remove the most recently added article URLs from the excluded table."""
+        conn = self._get_connection()
+        try:
+            conn.execute(
+                """
+                DELETE FROM excluded
+                WHERE id IN (
+                    SELECT id FROM excluded
+                    ORDER BY excluded_at DESC
+                    LIMIT ?
+                )
+                """,
+                (num_to_remove,)
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
     def get_recently_excluded_articles(self, limit: int = 10) -> list[str]:
         """Retrieve a list of recently excluded article URLs."""
         conn = self._get_connection()

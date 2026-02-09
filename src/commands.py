@@ -23,6 +23,7 @@ class CommandHandler:
         self.register_command(BotCommand(self.config, "/listsuperbadwords", list_super_bad_words))
         self.register_command(BotCommand(self.config, "/listtagkeywords", list_keywords_for_tag))
         self.register_command(BotCommand(self.config, "/recentlyexcluded", recently_excluded))
+        self.register_command(BotCommand(self.config, "/refilter", refilter_recently_excluded))
         self.register_command(BotCommand(self.config, "/removebadwords", remove_bad_words))
         self.register_command(BotCommand(self.config, "/removegoodwords", remove_good_words))
         self.register_command(BotCommand(self.config, "/removekeywordsfromtag", remove_keywords_from_tag))
@@ -187,3 +188,16 @@ def recently_excluded(config: Config, args: list[str]) -> CommandResponse:
         return CommandResponse(True, "No recently excluded articles.")
     response = "Recently excluded articles:\n\n" + "\n| ".join(excluded_articles)
     return CommandResponse(True, response)
+
+def refilter_recently_excluded(config: Config, args: list[str]) -> CommandResponse:
+    if not args or len(args) != 1:
+        return CommandResponse(False, 'Syntax: /refilter <count>')
+    try:
+        count = int(args[0])
+    except ValueError:
+        return CommandResponse(False, 'Syntax: /refilter <count>')
+    if count <= 0:
+        return CommandResponse(False, 'Syntax: /refilter <count>')
+
+    config.db.remove_recently_excluded_articles(count)
+    return CommandResponse(True, f"Removed {count} recently excluded articles for refiltering.")
