@@ -183,6 +183,11 @@ class Config:
         self.__session = {"session_string": session_string}
         self.save_config("config/session.yml", self.__session)
 
+    def add_super_bad_words(self, words: list[str]) -> None:
+        for word in words:
+            self.__add_super_bad_word(word)
+        self.save_config("config/filter.yml", self.__filter_config)
+
     def add_bad_words(self, words: list[str]) -> None:
         for word in words:
             self.__add_bad_word(word)
@@ -192,6 +197,14 @@ class Config:
         for word in words:
             self.__add_good_word(word)
         self.save_config("config/filter.yml", self.__filter_config)
+
+    def remove_super_bad_words(self, words: list[str]) -> int:
+        found = 0
+        for word in words:
+            if self.__remove_super_bad_word(word):
+                found += 1
+        self.save_config("config/filter.yml", self.__filter_config)
+        return found
 
     def remove_bad_words(self, words: list[str]) -> int:
         found = 0
@@ -248,6 +261,14 @@ class Config:
         self.__tags_config[tag] = keywords
         return orig_len > len(keywords)
 
+    def __remove_super_bad_word(self, word: str) -> bool:
+        if "super_bad_words" not in self.__filter_config:
+            return False
+        super_badwords = [sbw for sbw in self.__filter_config["super_bad_words"] if sbw.lower() != word.lower()]
+        orig_len = len(self.__filter_config["super_bad_words"])
+        self.__filter_config["super_bad_words"] = super_badwords
+        return orig_len > len(super_badwords)
+
     def __remove_bad_word(self, word: str) -> bool:
         badwords = [bw for bw in self.__filter_config["bad_words"] if bw.lower() != word.lower()]
         orig_len = len(self.__filter_config["bad_words"])
@@ -259,6 +280,12 @@ class Config:
         orig_len = len(self.__filter_config["good_words"])
         self.__filter_config["good_words"] = goodwords
         return orig_len > len(goodwords)
+
+    def __add_super_bad_word(self, word: str) -> None:
+        if "super_bad_words" not in self.__filter_config:
+            self.__filter_config["super_bad_words"] = []
+        self.__filter_config["super_bad_words"].append(word)
+        self.logger.info(f"Added '{word}' to super bad words filter.")
 
     def __add_bad_word(self, word: str) -> None:
         self.__filter_config["bad_words"].append(word)
