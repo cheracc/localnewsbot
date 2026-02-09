@@ -41,7 +41,7 @@ class BskyAccount():
         user, paswd = self.config.get_handle_password()
         try:
             self.client.login(user, paswd)
-            self.config.logger.debug(f"Logged in {user} (session: {self.client.export_session_string()})")
+            self.config.logger.debug(f"  Logged in {user} (session: {self.client.export_session_string()})")
             self.session_string = self.client.export_session_string()
         except AtProtocolError as e:
             self.config.logger.error(f"Could not login user {user}: {e}")

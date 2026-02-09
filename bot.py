@@ -12,11 +12,13 @@ def main():
     socket.setdefaulttimeout(20)
     config = Config() # loads config files and sets up database and api
 
-    config.logger.info("LocalNewsBot is starting up...")
+    config.logger.info(" LocalNewsBot is starting up...")
     try:
         config.get_bsky_account().get_chat_handler().check_for_commands()
         if "--no-posts" not in __import__('sys').argv:
             fetch_filter_and_post(config)
+        else:
+            config.logger.info(" --no-posts flag detected, skipping fetching and posting articles.")
         config.save_session()
     except Exception as e:
         config.logger.error(f"An error occurred: {e}")
