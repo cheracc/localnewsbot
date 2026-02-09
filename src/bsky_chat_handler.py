@@ -18,7 +18,7 @@ class BskyChatHandler:
         self.dm = self.dm_client.chat.bsky.convo
 
     def check_for_commands(self):
-        self.config.logger.debug("Checking chat messages for admin commands")
+        self.config.logger.debug("Checking chat messages for admin commands:")
         convo = self.__get_admin_convo()
         messages = self.__get_admin_messages(convo)
         if self.__parse_messages(messages, convo.id):
@@ -34,7 +34,7 @@ class BskyChatHandler:
             self.admin_did = id_resolver.handle.resolve(admin_handle)
 
         if self.admin_did:
-            self.config.logger.debug(f"Resolved admin user: {admin_handle}: {self.admin_did}")
+            self.config.logger.debug(f"  Resolved admin user: {admin_handle}: {self.admin_did}")
             return self.admin_did
         
         self.config.logger.warning(f"Could not resolve admin user: {admin_handle}")
@@ -45,7 +45,7 @@ class BskyChatHandler:
             admin_did = self.__get_admin_did()
             params = models.ChatBskyConvoGetConvoForMembers.Params(members=[admin_did])
             convo = self.dm.get_convo_for_members(params=params).convo
-            self.config.logger.debug(f"Found chat with admin {self.config.get_admin_handle().split(".")[0]}")
+            self.config.logger.debug(f"  Found chat with admin {self.config.get_admin_handle().split(".")[0]}")
             return convo
         except AtProtocolError as e:
             self.config.logger.error(f"Error fetching conversations: {e}")
@@ -54,7 +54,7 @@ class BskyChatHandler:
     def __get_admin_messages(self, convo) -> models.ChatBskyConvoGetMessages.Response:
         try:
             response = self.dm.get_messages(models.ChatBskyConvoGetMessages.Params(convo_id=convo.id))
-            self.config.logger.debug(f"Retrieved {len(response.messages)} messages in the chat")
+            self.config.logger.debug(f"  Retrieved {len(response.messages)} messages in the chat")
             return response
         except AtProtocolError as e:
             self.config.logger.error(f"Error fetching messages: {e}")

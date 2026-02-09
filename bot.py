@@ -12,6 +12,7 @@ def main():
     socket.setdefaulttimeout(20)
     config = Config() # loads config files and sets up database and api
 
+    config.logger.info("LocalNewsBot is starting up...")
     try:
         config.get_bsky_account().get_chat_handler().check_for_commands()
         if "--no-posts" not in __import__('sys').argv:
