@@ -101,6 +101,27 @@ class BskyPostHandler:
                     self.config.get_bsky_account().login()
                     card.thumb = self.client.upload_blob(resp.content).blob
                 except Exception as e:
+                    if isinstance(e, requests.HTTPError):
+                        try: #try with flaresolverr proxy if we got an HTTP error, in case it's a bot protection issue
+                            proxy_url = 'http://localhost:8191/v1'
+                            if proxy_url:
+                                self.logger.debug(f"Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url} with FlareSolverr proxy")
+                                resp = requests.get(proxy_url, 
+                                                    headers={"Content-Type": "application/json"},
+                                                    params={"cmd": "requests.get", "url": img_url, "max_timeout": 60000})
+                                resp.raise_for_status()
+                                img_data = resp.json().get("solution", {}).get("response", "")
+                                if img_data:
+                                    self.config.get_bsky_account().login()
+                                    card.thumb = self.client.upload_blob(img_data.encode()).blob
+                                    return models.AppBskyEmbedExternal.Main(external = card)
+                                else:
+                                    self.logger.warning(f"FlareSolverr proxy did not return image data for {img_url}")
+                            else:
+                                self.logger.warning(f"FlareSolverr proxy URL not configured, cannot attempt proxy fetch for {img_url}")
+                        except Exception as proxy_e:
+                            self.logger.warning(f"Could not fetch image for embed card using FlareSolverr proxy: {img_url},{proxy_e}")
+
                     self.logger.warning(f"Could not fetch Open Graph image for embed card: {bsky_post.link},{e}")
                     card.thumb = None
 
