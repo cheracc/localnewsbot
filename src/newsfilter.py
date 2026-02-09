@@ -57,7 +57,7 @@ class NewsFilter:
             pass
 
         for article in removed_articles:
-            if any(phrase in article.headline for phrase in good_words):
+            if any(phrase.lower() in article.headline.lower() for phrase in good_words):
                 self.logger.debug(f"Restoring due to ok phrase match: {article.headline}")
                 working_articles.append(article)
                 removed_articles.remove(article)
