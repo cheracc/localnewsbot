@@ -18,7 +18,7 @@ def main():
         if "--no-posts" not in __import__('sys').argv:
             fetch_filter_and_post(config)
         else:
-            config.logger.info(" --no-posts flag detected, skipping fetching and posting articles.")
+            config.logger.info(" Finished. (--no-posts flag detected)")
         config.save_session()
     except Exception as e:
         config.logger.error(f"An error occurred: {e}")
