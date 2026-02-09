@@ -18,10 +18,13 @@ class BskyChatHandler:
         self.dm = self.dm_client.chat.bsky.convo
 
     def check_for_commands(self):
-        self.config.logger.info("Checking chat messages for admin commands")
+        self.config.logger.debug("Checking chat messages for admin commands")
         convo = self.__get_admin_convo()
         messages = self.__get_admin_messages(convo)
-        self.__parse_messages(messages, convo.id)    
+        if self.__parse_messages(messages, convo.id):
+            self.config.logger.info("Processed admin chat messages")
+        else:
+            self.config.logger.info("No admin chat messages to process")    
 
     def __get_admin_did(self) -> str:
         admin_handle = self.config.get_admin_handle()
@@ -58,11 +61,13 @@ class BskyChatHandler:
             self.config.logger.error(f"Error fetching messages: {e}")
             raise
 
-    def __parse_messages(self, messages: models.ChatBskyConvoGetMessages.Response, convo_id: str) -> None:
+    def __parse_messages(self, messages: models.ChatBskyConvoGetMessages.Response, convo_id: str) -> bool:
+        did_something = False
         for message in messages.messages:
             if isinstance(message, models.ChatBskyConvoDefs.MessageView):
                 if (message.reactions and message.sender.did == self.admin_did) or message.sender.did == self.config.get_bsky_account().get_did():
                     self.dm.delete_message_for_self(models.ChatBskyConvoDeleteMessageForSelf.Data(convo_id=convo_id, message_id=message.id))
+                    did_something = True
                 if not message.reactions and message.sender.did == self.admin_did:
                     text = message.text
                     if (response := self.command_handler.parse_commands(text)):
@@ -72,6 +77,7 @@ class BskyChatHandler:
                             try:
                                 self.dm.add_reaction(models.ChatBskyConvoAddReaction.Data(convo_id=convo_id, message_id=message.id, value="👍"))
                                 self.dm.delete_message_for_self(models.ChatBskyConvoDeleteMessageForSelf.Data(convo_id=convo_id, message_id=message.id))
+                                did_something = True
                             except AtProtocolError as e:
                                 self.config.logger.warning(f"Error marking completed command: {e}")
                         
@@ -80,6 +86,7 @@ class BskyChatHandler:
                                 self.dm.send_message(models.ChatBskyConvoSendMessage.Data(
                                     convo_id=convo_id, 
                                     message=models.ChatBskyConvoDefs.MessageInput(text=response.response)))
+                                did_something = True
                             except AtProtocolError as e:
                                 self.config.logger.error(f"Error replying to convo: {e}")
                         # can only post 1000 grapheme messages, so this splits it if its longer:
@@ -94,6 +101,7 @@ class BskyChatHandler:
                                     )
                                     msg_datas.append(message_data)
                                 self.dm.send_message_batch(models.ChatBskyConvoSendMessageBatch.Data(items=msg_datas))
+                                did_something = True
                             except AtProtocolError as e:
                                 self.config.logger.error(f"Error replying to convo: {e}")
                     else:
@@ -101,8 +109,10 @@ class BskyChatHandler:
                         try:                            
                             self.dm.add_reaction(models.ChatBskyConvoAddReaction.Data(convo_id=convo_id, message_id=message.id, value="❓"))
                             self.dm.delete_message_for_self(models.ChatBskyConvoDeleteMessageForSelf.Data(convo_id=convo_id, message_id=message.id))
+                            did_something = True
                         except AtProtocolError as e:
                             self.config.logger.warning(f"Error marking unrecognized command: {e}")
+        return did_something
 
 def split_pipe_string(s: str, max_len: int = 999) -> list[str]:
     parts = s.split('|')
