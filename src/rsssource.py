@@ -100,5 +100,5 @@ def get_rss_feeds(config: Config) -> list[BskyPost]: # type: ignore
         articles.extend(feed_articles)
         config.logger.debug(f"Fetched {len(feed_articles)} articles from RSS feed: {feed._name}")
 
-    config.logger.info(f"Fetched {len(articles)} articles from RSS feeds.")
+    config.logger.info(f" Fetched {len(articles)} articles from RSS feeds.")
     return articles

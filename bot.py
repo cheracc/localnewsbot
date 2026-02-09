@@ -28,7 +28,7 @@ def fetch_filter_and_post(config: Config):
     articles = get_all_new_articles(config)
     if not articles:
         elapsed = time.time() - start_time
-        config.logger.info(f"Finished({elapsed:.2f}s): No new articles found.")
+        config.logger.info(f" Finished({elapsed:.2f}s): No new articles found.")
         return
 
     # Filter articles
@@ -37,13 +37,13 @@ def fetch_filter_and_post(config: Config):
     
     if not articles:
         elapsed = time.time() - start_time
-        config.logger.info(f"Finished({elapsed:.2f}s): No articles to post after filtering.")
+        config.logger.info(f" Finished({elapsed:.2f}s): No articles to post after filtering.")
         return
     
-    config.logger.info(f"Posting {len(articles)} articles:")
+    config.logger.info(f" Posting {len(articles)} articles:")
     post_all_articles(articles, config)
     elapsed = time.time() - start_time
-    config.logger.info(f"Finished({elapsed:.2f}s): Fetched: {total_fetched}, Filtered: {total_fetched - len(articles)}, Posted: {len(articles)}")
+    config.logger.info(f" Finished({elapsed:.2f}s): Fetched: {total_fetched}, Filtered: {total_fetched - len(articles)}, Posted: {len(articles)}")
 
 def get_all_new_articles(config: Config) -> list[BskyPost]:
         start_time = time.time()
@@ -52,7 +52,7 @@ def get_all_new_articles(config: Config) -> list[BskyPost]:
         articles.extend(src.htmlsource.get_html_sources(config))
         if not articles:
             return []
-        config.logger.info(f"Fetched {len(articles)} articles in {time.time() - start_time:.2f} seconds.")
+        config.logger.info(f" Fetched {len(articles)} articles in {time.time() - start_time:.2f} seconds.")
         return articles
 
 def post_all_articles(articles: list[BskyPost], config: Config):
@@ -64,7 +64,7 @@ def post_all_articles(articles: list[BskyPost], config: Config):
 
             if i < len(articles) - 1:
                 delay = config.get_delay_between_posts_seconds()
-                config.logger.info(f"  Waiting {delay} seconds before next post..")
+                config.logger.info(f"   Waiting {delay} seconds before next post..")
                 time.sleep(delay)
 
 if __name__ == "__main__":

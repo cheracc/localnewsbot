@@ -284,15 +284,15 @@ class Config:
         if "super_bad_words" not in self.__filter_config:
             self.__filter_config["super_bad_words"] = []
         self.__filter_config["super_bad_words"].append(word)
-        self.logger.info(f"Added '{word}' to super bad words filter.")
+        self.logger.info(f" Added '{word}' to super bad words filter.")
 
     def __add_bad_word(self, word: str) -> None:
         self.__filter_config["bad_words"].append(word)
-        self.logger.info(f"Added '{word}' to bad words filter.")
+        self.logger.info(f" Added '{word}' to bad words filter.")
 
     def __add_good_word(self, word: str) -> None:
         self.__filter_config["good_words"].append(word)
-        self.logger.info(f"Added '{word}' to good words filter.")
+        self.logger.info(f" Added '{word}' to good words filter.")
 
     def __create_logger(self) -> logging.Logger:
         logger = logging.getLogger("bot")

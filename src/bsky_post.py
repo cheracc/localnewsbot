@@ -48,7 +48,7 @@ class BskyPost:
         self.config.logger.debug(f"  Keyword matched tags: {tag_str}")
         self.config.get_bsky_account().post_article(self)
         end_time = time.time()
-        self.config.logger.info(f"  Finished posting to Bluesky ({end_time - start_time:.2f} seconds)")
+        self.config.logger.info(f"   Finished posting to Bluesky ({end_time - start_time:.2f} seconds)")
 
     def format_post_text(self) -> str:
         text = f"{self.headline}\n\n{self.description}"
@@ -90,6 +90,6 @@ class BskyPost:
         if not self.config.get_summarizer().is_enabled():
             return ""
         
-        self.config.logger.info(f"  Generating AI summary for: {self.headline}")
+        self.config.logger.info(f"   Generating AI summary for: {self.headline}")
         response = self.config.get_summarizer().summarize(self.link)
         return response

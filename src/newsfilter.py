@@ -72,7 +72,7 @@ class NewsFilter:
 
         self.logger.info(" The following articles were removed by filters:")
         for article in removed_articles:
-            self.logger.info(f"  -  {article.headline}({article.source_name})")
+            self.logger.info(f"   -  {article.headline}({article.source_name})")
         
 
         return working_articles

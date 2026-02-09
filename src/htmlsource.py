@@ -61,5 +61,5 @@ def get_html_sources(config: Config) -> list[BskyPost]:
         articles.extend(source_articles)
         config.logger.debug(f"Fetched {len(source_articles)} articles from HTML source: {source._name}")
 
-    config.logger.info(f"Fetched {len(articles)} articles from HTML sources.")
+    config.logger.info(f" Fetched {len(articles)} articles from HTML sources.")
     return articles
