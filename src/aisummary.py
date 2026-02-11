@@ -3,6 +3,7 @@ from google import genai
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.config import Config
+    from src.bsky_post import BskyPost
 
 
 # Summarizer uses google GenAI to summarize a news article
@@ -34,19 +35,20 @@ class Summarizer:
         """Check if API key is configured and not a placeholder."""
         return bool(api_key and api_key.strip() and api_key != "your-api-key-here")
 
-    def summarize(self, link_to_article: str) -> str:
+    def summarize(self, post: BskyPost) -> str:
         """Summarize an article using Gemini API. Returns empty string if disabled or on error."""
         if not self.enabled:
             return ""
         
         try:
+            article_content = f"Headline: {post.headline}\n\nDescription: {post.description}"
             response = self.client.models.generate_content(
                 model=self.config.get_gemini_model(),
-                contents=self.config.get_ai_summary_prompt() + link_to_article,
+                contents=self.config.get_ai_summary_prompt() + article_content,
             )
             return response.text if response and response.text else ""
         except Exception as e:
-            self.logger.error(f"Error generating summary for {link_to_article}: {e}")
+            self.logger.error(f"Error generating summary for {post.headline}: {e}")
             return ""
     
     def is_enabled(self) -> bool:

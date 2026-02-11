@@ -91,5 +91,5 @@ class BskyPost:
             return ""
         
         self.config.logger.info(f"   Generating AI summary for: {self.headline}")
-        response = self.config.get_summarizer().summarize(self.link)
+        response = self.config.get_summarizer().summarize(self)
         return response
