@@ -92,7 +92,7 @@ class BskyPostHandler:
                 card.thumb = None
 
         if not card.thumb:
-            img_url = self.get_img_url_from_open_graph(bsky_post=bsky_post).split(',')[0]
+            img_url = self.get_img_url_from_open_graph(bsky_post=bsky_post).split('?')[0]
             if img_url and len(img_url) > 0:
                 try:
                     self.logger.debug(f"  Attempting to get imageblob from Open Graph for {bsky_post.link} using {img_url}")
